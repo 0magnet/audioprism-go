@@ -80,6 +80,28 @@ func ValueToPixelHeat(value float64) color.Color {
 	return color.RGBA{r, g, b, 255}
 }
 
+// ValueToPixelBlue converts a normalized value to a color based on a blue gradient.
+func ValueToPixelBlue(value float64) color.Color {
+	var r, g, b uint8
+
+	if value < 0.5 {
+		b = uint8(255.0 * Normalize(value, 0.0, 0.5))
+	} else {
+		c := uint8(255.0 * Normalize(value, 0.5, 1.0))
+		r = c
+		g = c
+		b = 255
+	}
+
+	return color.RGBA{r, g, b, 255}
+}
+
+// ValueToPixelGrayscale converts a normalized value to a grayscale color.
+func ValueToPixelGrayscale(value float64) color.Color {
+	c := uint8(255.0 * value)
+	return color.RGBA{c, c, c, 255}
+}
+
 // MagnitudeToPixel converts a magnitude value to a pixel color.
 func MagnitudeToPixel(value float64) color.Color {
 	if LogMagnitude {
