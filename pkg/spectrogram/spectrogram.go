@@ -112,7 +112,7 @@ func MagnitudeToPixel(value float64) color.Color {
 
 // ComputeFFT computes the FFT of the input and returns the magnitudes.
 func ComputeFFT(input []float32) []float64 {
-	hammingWindow := window.Hamming(FFTSize)
+	hammingWindow := window.Hann(FFTSize)
 	windowedBuffer := make([]float64, FFTSize)
 	for i := 0; i < FFTSize; i++ {
 		windowedBuffer[i] = float64(input[i]) * hammingWindow[i]
