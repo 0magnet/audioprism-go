@@ -19,9 +19,9 @@ var (
 	rndrFr    js.Func
 	sP        js.Value
 	glTypes   wgl.GLTypes
-	uSampler  js.Value // Uniform location for sampler
-	vPos      js.Value // Attribute location for position
-	vTexCoord js.Value // Attribute location for texture coordinates
+	uSampler  js.Value
+	vPos      js.Value
+	vTexCoord js.Value
 )
 
 func main() {
@@ -30,20 +30,18 @@ func main() {
 	initShaders()
 	spectexture()
 	renderLoop()
-	select {} // Block main thread to keep the program running
+	select {}
 }
 
 func initWS() {
-	// Get the current protocol and host from the browser window
     protocol := "ws"
     if js.Global().Get("window").Get("location").Get("protocol").String() == "https:" {
-        protocol = "wss" // Use secure WebSocket for HTTPS
+        protocol = "wss"
     }
 
     host := js.Global().Get("window").Get("location").Get("host").String()
-    path := "/ws" // Your WebSocket endpoint path
+    path := "/ws"
 
-    // Construct the WebSocket URL dynamically based on the current location
     wsURL := protocol + "://" + host + path
 
     ws := js.Global().Get("WebSocket").New(wsURL)
@@ -120,21 +118,16 @@ func initGL() {
 		log.Fatal("Canvas element with ID 'gocanvas' not found")
 		return
 	}
-
 	wVal := c.Get("clientWidth")
 	hVal := c.Get("clientHeight")
-
 	if wVal.IsUndefined() || hVal.IsUndefined() {
 		log.Fatal("Failed to get canvas dimensions")
 		return
 	}
-
 	w = wVal.Int()
 	h = hVal.Int()
-
 	c.Set("width", w)
 	c.Set("height", h)
-
 	gl = c.Call("getContext", "webgl")
 	if gl.IsUndefined() {
 		gl = c.Call("getContext", "experimental-webgl")
@@ -143,8 +136,6 @@ func initGL() {
 		js.Global().Call("alert", "Browser might not support WebGL")
 		return
 	}
-
-	// Initialize GLTypes
 	glTypes.New(gl)
 }
 
