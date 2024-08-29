@@ -1,3 +1,4 @@
+// Package wgl pkg/wgl/wgl.go
 package wgl
 
 import (
@@ -39,6 +40,7 @@ type GLTypes struct {
 	TriangleStrip      js.Value
 }
 
+// New initializes a new instance
 func (types *GLTypes) New(gl js.Value) {
 	types.StaticDraw = gl.Get("STATIC_DRAW")
 	types.ArrayBuffer = gl.Get("ARRAY_BUFFER")
@@ -70,53 +72,54 @@ func (types *GLTypes) New(gl js.Value) {
 	types.TriangleStrip = gl.Get("TRIANGLE_STRIP")
 }
 
+// SliceToByteSlice converts slice to byte slice
 func SliceToByteSlice(s interface{}) []byte {
 	switch s := s.(type) {
 	case []int8:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
-		return *(*[]byte)(unsafe.Pointer(h))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
+		return *(*[]byte)(unsafe.Pointer(h))            //nolint
 	case []int16:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 2
 		h.Cap *= 2
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []int32:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 4
 		h.Cap *= 4
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []int64:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 8
 		h.Cap *= 8
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []uint8:
 		return s
 	case []uint16:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 2
 		h.Cap *= 2
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []uint32:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 4
 		h.Cap *= 4
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []uint64:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 8
 		h.Cap *= 8
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []float32:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 4
 		h.Cap *= 4
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case []float64:
-		h := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+		h := (*reflect.SliceHeader)(unsafe.Pointer(&s)) //nolint
 		h.Len *= 8
 		h.Cap *= 8
-		return *(*[]byte)(unsafe.Pointer(h))
+		return *(*[]byte)(unsafe.Pointer(h)) //nolint
 	case js.Value: // Add case for JavaScript Value
 		if s.InstanceOf(js.Global().Get("Uint8Array")) {
 			buf := s.Get("buffer")
@@ -125,12 +128,13 @@ func SliceToByteSlice(s interface{}) []byte {
 			js.CopyBytesToGo(byteArray, typedArray)
 			return byteArray
 		}
-		panic("jsutil: unexpected value at sliceToBytesSlice: " + s.Type().String())
+		panic("jsutil: unexpected value at sliceToBytesSlice: " + s.Type().String()) //nolint
 	default:
-		panic("jsutil: unexpected value at sliceToBytesSlice: " + js.ValueOf(s).Type().String())
+		panic("jsutil: unexpected value at sliceToBytesSlice: " + js.ValueOf(s).Type().String()) //nolint
 	}
 }
 
+// SliceToTypedArray converts slice to typed array
 func SliceToTypedArray(s interface{}) js.Value {
 	switch s := s.(type) {
 	case []int8:

@@ -15,8 +15,8 @@ import (
 	"github.com/spf13/cobra"
 
 	fyneui "github.com/0magnet/audioprism-go/cmd/fyne/commands"
-	gomobileui "github.com/0magnet/audioprism-go/cmd/gomobile/commands"
 	gomobileuiws "github.com/0magnet/audioprism-go/cmd/gomobile-ws/commands"
+	gomobileui "github.com/0magnet/audioprism-go/cmd/gomobile/commands"
 	wasm "github.com/0magnet/audioprism-go/cmd/wasm/commands"
 )
 
@@ -27,10 +27,10 @@ func init() {
 		gomobileuiws.RootCmd,
 		wasm.RootCmd,
 	)
-	fyneui.RootCmd.Use="f"
-	gomobileui.RootCmd.Use="m"
-	gomobileuiws.RootCmd.Use="mw"
-	wasm.RootCmd.Use="w"
+	fyneui.RootCmd.Use = "f"
+	gomobileui.RootCmd.Use = "m"
+	gomobileuiws.RootCmd.Use = "mw"
+	wasm.RootCmd.Use = "w"
 	var helpflag bool
 	RootCmd.SetUsageTemplate(help)
 	RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help for "+RootCmd.Use)

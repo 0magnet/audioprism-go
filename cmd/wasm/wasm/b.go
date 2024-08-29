@@ -1,3 +1,4 @@
+// Package main cmd/wasm/wasm/b.go
 package main
 
 import (
@@ -15,7 +16,7 @@ var (
 	gl        js.Value
 	t         js.Value
 	sHist     [][]byte
-	wskt      js.Value
+	wskt      js.Value //nolint
 	rndrFr    js.Func
 	sP        js.Value
 	glTypes   wgl.GLTypes
@@ -34,25 +35,25 @@ func main() {
 }
 
 func initWS() {
-    protocol := "ws"
-    if js.Global().Get("window").Get("location").Get("protocol").String() == "https:" {
-        protocol = "wss"
-    }
+	protocol := "ws"
+	if js.Global().Get("window").Get("location").Get("protocol").String() == "https:" {
+		protocol = "wss"
+	}
 
-    host := js.Global().Get("window").Get("location").Get("host").String()
-    path := "/ws"
+	host := js.Global().Get("window").Get("location").Get("host").String()
+	path := "/ws"
 
-    wsURL := protocol + "://" + host + path
+	wsURL := protocol + "://" + host + path
 
-    ws := js.Global().Get("WebSocket").New(wsURL)
-    if ws.IsUndefined() {
-        log.Fatal("WebSocket not supported in this browser")
-        return
-    }
+	ws := js.Global().Get("WebSocket").New(wsURL)
+	if ws.IsUndefined() {
+		log.Fatal("WebSocket not supported in this browser")
+		return
+	}
 
-    log.Printf("Connected to WebSocket at %s\n", wsURL)
+	log.Printf("Connected to WebSocket at %s\n", wsURL)
 
-	ws.Call("addEventListener", "message", js.FuncOf(func(this js.Value, p []js.Value) interface{} {
+	ws.Call("addEventListener", "message", js.FuncOf(func(this js.Value, p []js.Value) interface{} { //nolint
 		data := p[0].Get("data")
 		if data.IsUndefined() {
 			return nil
@@ -60,7 +61,7 @@ func initWS() {
 
 		if data.InstanceOf(js.Global().Get("Blob")) {
 			reader := js.Global().Get("FileReader").New()
-			reader.Call("addEventListener", "load", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			reader.Call("addEventListener", "load", js.FuncOf(func(this js.Value, args []js.Value) interface{} { //nolint
 				ab := reader.Get("result")
 				if ab.IsUndefined() || !ab.InstanceOf(js.Global().Get("ArrayBuffer")) {
 					log.Println("Failed to read Blob as ArrayBuffer")
@@ -195,7 +196,7 @@ func spectexture() {
 func renderLoop() {
 	log.Println("Starting render loop")
 
-	rndrFr = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	rndrFr = js.FuncOf(func(this js.Value, args []js.Value) interface{} { //nolint
 		updateSD()
 		renderSpect()
 		js.Global().Call("requestAnimationFrame", rndrFr)

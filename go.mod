@@ -5,7 +5,6 @@ go 1.22.4
 require (
 	fyne.io/fyne/v2 v2.5.1
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-gl/mathgl v1.1.0
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/jfreymuth/pulse v0.1.1
 	github.com/mjibson/go-dsp v0.0.0-20180508042940-11479a337f12

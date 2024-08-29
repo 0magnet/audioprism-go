@@ -141,9 +141,6 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/deps/mingw
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps/vs2008
 github.com/go-gl/glfw/v3.3/glfw/glfw/include/GLFW
 github.com/go-gl/glfw/v3.3/glfw/glfw/src
-# github.com/go-gl/mathgl v1.1.0
-## explicit; go 1.11
-github.com/go-gl/mathgl/mgl32
 # github.com/go-playground/locales v0.14.1
 ## explicit; go 1.17
 github.com/go-playground/locales
@@ -337,7 +334,6 @@ golang.org/x/exp/shiny/screen
 golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
-golang.org/x/image/math/f32
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/tiff

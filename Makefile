@@ -8,8 +8,6 @@ GOARCH := $(shell go env GOARCH)
 # Test options
 TEST_OPTS := -cover -timeout=5m -mod=vendor
 
-# Lint options
-LINT_OPTS :=
 
 check: lint test ## Run linters and tests
 
@@ -18,7 +16,8 @@ build: ## Install dependencies, build binary
 
 lint: ## Run linters
 	golangci-lint --version
-	$(LINT_OPTS) golangci-lint run -c .golangci.yml ./...
+	golangci-lint run -c .golangci.yml  --exclude-files cmd/wasm/wasm/b.go --exclude-files pkg/wgl/wgl.go ./...
+	GOOS=js GOARCH=wasm golangci-lint run -c .golangci.yml  cmd/wasm/wasm/... pkg/wgl/...
 
 test: ## Run tests if test files are present
 	@echo "Checking for test files..."
