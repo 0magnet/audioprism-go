@@ -18,8 +18,8 @@ func init() {
 
 // RootCmd conta8ns the root cli command
 var RootCmd = &cobra.Command{
-	Use:   "mobile",
-	Short: "with golang.org/x/mobile GUI",
+	Use:   "mobile-ws",
+	Short: "with golang.org/x/mobile GUI via websockets",
 	Long: `
 	┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
 	│ ┬│ │││││ │├┴┐││  ├┤

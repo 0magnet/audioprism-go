@@ -34,11 +34,25 @@ func main() {
 }
 
 func initWS() {
-	ws := js.Global().Get("WebSocket").New("ws://127.0.0.1:8080/ws")
-	if ws.IsUndefined() {
-		log.Fatal("WebSocket not supported in this browser")
-		return
-	}
+	// Get the current protocol and host from the browser window
+    protocol := "ws"
+    if js.Global().Get("window").Get("location").Get("protocol").String() == "https:" {
+        protocol = "wss" // Use secure WebSocket for HTTPS
+    }
+
+    host := js.Global().Get("window").Get("location").Get("host").String()
+    path := "/ws" // Your WebSocket endpoint path
+
+    // Construct the WebSocket URL dynamically based on the current location
+    wsURL := protocol + "://" + host + path
+
+    ws := js.Global().Get("WebSocket").New(wsURL)
+    if ws.IsUndefined() {
+        log.Fatal("WebSocket not supported in this browser")
+        return
+    }
+
+    log.Printf("Connected to WebSocket at %s\n", wsURL)
 
 	ws.Call("addEventListener", "message", js.FuncOf(func(this js.Value, p []js.Value) interface{} {
 		data := p[0].Get("data")

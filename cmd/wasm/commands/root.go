@@ -49,7 +49,7 @@ func init() {
 
 var RootCmd = &cobra.Command{
 	Use:   "wasm",
-	Short: "with wasm",
+	Short: "with wasm via websockets",
 	Long: `
 	┬ ┬┌─┐┌─┐┌┬┐
 	│││├─┤└─┐│││
