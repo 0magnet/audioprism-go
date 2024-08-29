@@ -13,11 +13,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/bitfield/script"
 	"github.com/gin-gonic/gin"
 	"github.com/jfreymuth/pulse"
 	"github.com/spf13/cobra"
@@ -26,6 +28,8 @@ import (
 
 var (
 	webPort int
+	devMode bool
+	tinyGo  bool
 
 	//go:embed wasm_exec.js
 	wasmExecJs []byte
@@ -33,10 +37,14 @@ var (
 	//go:embed bundle.wasm
 	wasmBinary []byte
 
-	wasmData             []byte
-	htmlPageTemplateData htmlTemplateData
-	tmpl                 *htmpl.Template
-	err                  error
+	wasmData               []byte
+	wasmPath               string
+	htmlPageTemplateData   htmlTemplateData
+	tmpl                   *htmpl.Template
+	err                    error
+	wasmExecLocation       = runtime.GOROOT() + "/misc/wasm/wasm_exec.js"
+	tinygowasmExecLocation = strings.TrimSuffix(runtime.GOROOT(), "go") + "tinygo" + "/targets/wasm_exec.js"
+	wasmExecScript         string
 )
 
 func init() {
@@ -45,6 +53,21 @@ func init() {
 		defaultport = 8080
 	}
 	RootCmd.Flags().IntVarP(&webPort, "port", "p", defaultport, "port to serve on - env WEBPORT="+os.Getenv("WEBPORT"))
+	_, err = script.Exec(`bash --help`).Bytes()
+	if err == nil {
+		_, err = script.Exec(`go help`).Bytes()
+		if err == nil {
+			RootCmd.Flags().BoolVarP(&devMode, "dev", "d", false, "compile wasm from source")
+		}
+		_, err1 := script.Exec(`tinygo help`).Bytes()
+		if err1 == nil {
+			RootCmd.Flags().BoolVarP(&tinyGo, "tinygo", "t", false, "compile wasm from source with tinygo")
+		}
+		if err == nil || err1 == nil {
+			RootCmd.Flags().StringVarP(&wasmPath, "wpath", "w", "cmd/wasm/wasm/b.go", "path to wasm source in dev mode")
+		}
+	}
+
 }
 
 var RootCmd = &cobra.Command{
@@ -55,6 +78,19 @@ var RootCmd = &cobra.Command{
 	│││├─┤└─┐│││
 	└┴┘┴ ┴└─┘┴ ┴`,
 	Run: func(_ *cobra.Command, _ []string) {
+		if tinyGo {
+			devMode = true
+			wasmExecScript, err = script.File(tinygowasmExecLocation).String()
+			if err != nil {
+				log.Fatal("Could not read tinygo wasm_exec.js file: %s\n", err)
+			}
+		}
+		if devMode && wasmExecScript == "" {
+			wasmExecScript, err = script.File(wasmExecLocation).String()
+			if err != nil {
+				log.Fatal("Could not read wasm_exec.js file: %s\n", err)
+			}
+		}
 		wg := new(sync.WaitGroup)
 
 		r1 := gin.New()
@@ -75,8 +111,29 @@ var RootCmd = &cobra.Command{
 				return
 			}
 
-			htmlPageTemplateData.WasmExecJs = htmpl.JS(string(wasmExecJs))
-			htmlPageTemplateData.WasmBase64 = base64.StdEncoding.EncodeToString(wasmBinary)
+			if devMode {
+				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript)
+				if tinyGo {
+					htmlPageTemplateData.Title = "audioprism-go WASM tinygo dev mode"
+					wasmData, err = script.Exec(`bash -c 'GOOS=js GOARCH=wasm tinygo build -target wasm -o /dev/stdout ` + wasmPath + `'`).Bytes()
+				} else {
+					htmlPageTemplateData.Title = "audioprism-go WASM dev mode"
+					wasmData, err = script.Exec(`bash -c 'GOOS=js GOARCH=wasm go build -o /dev/stdout ` + wasmPath + `'`).Bytes()
+				}
+				if err != nil {
+					msg := fmt.Sprintf("Could not compile or read wasm file:\n%s\n%v\n", string(wasmData), err)
+					fmt.Println(msg)
+					c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+					c.Writer.Flush()
+					return
+				}
+				htmlPageTemplateData.WasmBase64 = base64.StdEncoding.EncodeToString(wasmData)
+			} else {
+				htmlPageTemplateData.Title = "audioprism-go WASM"
+				htmlPageTemplateData.WasmExecJs = htmpl.JS(string(wasmExecJs))
+				htmlPageTemplateData.WasmBase64 = base64.StdEncoding.EncodeToString(wasmBinary)
+			}
+
 			tmplData := map[string]interface{}{
 				"Page": htmlPageTemplateData,
 			}
@@ -168,7 +225,7 @@ func loggingMiddleware() gin.HandlerFunc {
 		path := c.Request.URL.Path
 		statusCodeBackgroundColor := getBackgroundColor(statusCode)
 		methodColor := getMethodColor(method)
-		fmt.Printf("[WASMSTUFF] | %s |%s %3d %s| %13v | %15s | %72s |%s %-7s %s %s\n", time.Now().Format("2006/01/02 - 15:04:05"), statusCodeBackgroundColor, statusCode, resetColor(), latency, c.ClientIP(), c.Request.RemoteAddr, methodColor, method, resetColor(), path)
+		fmt.Printf("[AUDIOPRISM-GO] | %s |%s %3d %s| %13v | %15s | %72s |%s %-7s %s %s\n", time.Now().Format("2006/01/02 - 15:04:05"), statusCodeBackgroundColor, statusCode, resetColor(), latency, c.ClientIP(), c.Request.RemoteAddr, methodColor, method, resetColor(), path)
 	}
 }
 func getBackgroundColor(statusCode int) string {
@@ -226,6 +283,7 @@ const (
 )
 
 type htmlTemplateData struct {
+	Title      string
 	WasmExecJs htmpl.JS
 	WasmBase64 string
 }
@@ -235,7 +293,7 @@ const indexHtmpl = `
 <html>
 <head>
 <meta charset="utf-8">
-<title>WASM Stuff</title>
+<title>{{.Page.Title}}</title>
 <style>
 body, html {
 margin: 0;

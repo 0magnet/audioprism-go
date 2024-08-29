@@ -121,6 +121,8 @@ func initGL() {
 	}
 	wVal := c.Get("clientWidth")
 	hVal := c.Get("clientHeight")
+	log.Printf("clientWidth: %s ; clientHeight: %s", wVal.String(), hVal.String())
+
 	if wVal.IsUndefined() || hVal.IsUndefined() {
 		log.Fatal("Failed to get canvas dimensions")
 		return
