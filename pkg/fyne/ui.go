@@ -24,7 +24,7 @@ import (
 // Run initializes and starts the Fyne application for spectrogram visualization.
 // It sets up audio recording, updates the spectrogram, and displays the result in a window.
 func Run(_, bufferSize int) {
-//	updateRate = upd
+	//	updateRate = upd
 	c, err := pulse.NewClient()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -92,7 +92,7 @@ func Run(_, bufferSize int) {
 	w.SetContent(mainContainer)
 
 	ticker := time.NewTicker(time.Duration(1000/120) * time.Millisecond)
-		 defer ticker.Stop()
+	defer ticker.Stop()
 
 	go func() {
 		startTime := time.Now()
