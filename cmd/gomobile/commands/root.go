@@ -11,9 +11,9 @@ var width, height int
 var showFPS bool
 
 func init() {
-	RootCmd.Flags().IntVar(&width, "width", 512, "Width of the spectrogram")
-	RootCmd.Flags().IntVar(&height, "height", 256, "Height of the spectrogram (typically FFTSize / 2)")
-	RootCmd.Flags().BoolVar(&showFPS, "show-fps", true, "Display the FPS counter")
+	RootCmd.Flags().IntVar(&width, "width", 512, "width of the spectrogram")
+	RootCmd.Flags().IntVar(&height, "height", 256, "height of the spectrogram")
+	RootCmd.Flags().BoolVar(&showFPS, "show-fps", false, "show frames per second counter")
 }
 
 // RootCmd conta8ns the root cli command
