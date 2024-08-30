@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"image/draw"
 	"log"
-	"math"
 	"strconv"
 	"sync"
 	"time"
@@ -20,12 +19,12 @@ import (
 	"github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
 
-var updateRate int
+//var updateRate int
 
 // Run initializes and starts the Fyne application for spectrogram visualization.
 // It sets up audio recording, updates the spectrogram, and displays the result in a window.
-func Run(upd, bufferSize int) {
-	updateRate = upd
+func Run(_, bufferSize int) {
+//	updateRate = upd
 	c, err := pulse.NewClient()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -92,31 +91,31 @@ func Run(upd, bufferSize int) {
 	mainContainer := container.NewStack(img, overlay)
 	w.SetContent(mainContainer)
 
-	tickerDuration := time.Second / time.Duration(updateRate)
+	ticker := time.NewTicker(time.Duration(1000/120) * time.Millisecond)
+		 defer ticker.Stop()
 
 	go func() {
-		ticker := time.NewTicker(tickerDuration)
-		defer ticker.Stop()
-
+		startTime := time.Now()
+		var framecount int
+		var fps float64
 		for range ticker.C {
-			start := time.Now()
 
 			img.Refresh()
+			framecount++
 
 			fpsText.Move(fyne.NewPos(mainContainer.Size().Width-fpsText.MinSize().Width-10, 10))
 
-			now := time.Now()
-			elapsed := now.Sub(start)
-			fps := float64(1) / elapsed.Seconds()
-			fpsText.Text = "FPS: " + strconv.Itoa(int(math.Round(fps)))
+			if time.Now().Sub(startTime) > time.Second {
+				fps = float64(framecount) / time.Now().Sub(startTime).Seconds()
+				startTime = time.Now()
+				framecount = 0
+			}
+			fpsText.Text = "FPS: " + strconv.FormatFloat(fps, 'f', 2, 64)
 			fpsText.Refresh()
 		}
 	}()
 
 	go func() {
-		ticker := time.NewTicker(tickerDuration)
-		defer ticker.Stop()
-
 		for range ticker.C {
 			chunk := spectrogram.GetAudioChunk()
 			if chunk == nil {
