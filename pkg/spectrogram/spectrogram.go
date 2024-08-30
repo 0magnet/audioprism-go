@@ -12,12 +12,6 @@ import (
 )
 
 const (
-	// SampleRate is the rate at which audio samples are taken.
-	SampleRate = 44100
-
-	// Channels is the number of audio channels.
-	Channels = 1
-
 	// BufferSize is the size of the audio buffer.
 	BufferSize = 32768
 
@@ -27,16 +21,13 @@ const (
 	// OverlapRatio is the ratio of overlap between consecutive FFT windows.
 	OverlapRatio = 0.5
 
-	// MaxFrequency is the maximum frequency represented in the spectrogram.
-	MaxFrequency = 12000
-
 	// MinMagnitude is the minimum magnitude value for normalization.
 	MinMagnitude = 0.0
 
 	// MaxMagnitude is the maximum magnitude value for normalization.
 	MaxMagnitude = 45.0
 
-	// LogMagnitude determines if magnitude should be converted to logarithmic scale.
+	// LogMagnitude sets linear or logrithmic magnituide of color gradient
 	LogMagnitude = true
 )
 

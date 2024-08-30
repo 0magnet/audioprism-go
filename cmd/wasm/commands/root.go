@@ -11,6 +11,7 @@ import (
 	"fmt"
 	htmpl "html/template"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"runtime"
@@ -176,7 +177,9 @@ func wsHandler(ws *websocket.Conn) {
 
 	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
 		if len(p) > 0 {
-			err := websocket.Message.Send(ws, float32SliceToByteSlice(p))
+			// err := websocket.Message.Send(ws, float32SliceToByteSlice(p))
+			err := websocket.Message.Send(ws, float32SliceToBase64String(p))
+
 			if err != nil {
 				log.Println("Failed to send message:", err)
 				return 0, err
@@ -198,6 +201,19 @@ func wsHandler(ws *websocket.Conn) {
 			break
 		}
 	}
+}
+
+func float32SliceToBase64String(floats []float32) string {
+	// Convert the float32 slice to a byte slice using base64 encoding
+	byteSlice := make([]byte, len(floats)*4)
+	for i, f := range floats {
+		bits := math.Float32bits(f)
+		byteSlice[i*4+0] = byte(bits >> 0)
+		byteSlice[i*4+1] = byte(bits >> 8)
+		byteSlice[i*4+2] = byte(bits >> 16)
+		byteSlice[i*4+3] = byte(bits >> 24)
+	}
+	return base64.StdEncoding.EncodeToString(byteSlice)
 }
 
 func float32SliceToByteSlice(floats []float32) []byte {

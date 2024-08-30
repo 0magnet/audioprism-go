@@ -2,7 +2,7 @@
 package main
 
 import (
-	"encoding/binary"
+	"encoding/base64"
 	"log"
 	"math"
 	"syscall/js"
@@ -39,12 +39,9 @@ func initWS() {
 	if js.Global().Get("window").Get("location").Get("protocol").String() == "https:" {
 		protocol = "wss"
 	}
-
 	host := js.Global().Get("window").Get("location").Get("host").String()
 	path := "/ws"
-
 	wsURL := protocol + "://" + host + path
-
 	ws := js.Global().Get("WebSocket").New(wsURL)
 	if ws.IsUndefined() {
 		log.Fatal("WebSocket not supported in this browser")
@@ -59,56 +56,36 @@ func initWS() {
 			return nil
 		}
 
-		if data.InstanceOf(js.Global().Get("Blob")) {
-			reader := js.Global().Get("FileReader").New()
-			reader.Call("addEventListener", "load", js.FuncOf(func(this js.Value, args []js.Value) interface{} { //nolint
-				ab := reader.Get("result")
-				if ab.IsUndefined() || !ab.InstanceOf(js.Global().Get("ArrayBuffer")) {
-					log.Println("Failed to read Blob as ArrayBuffer")
-					return nil
-				}
-
-				uint8Array := js.Global().Get("Uint8Array").New(ab)
-				bytes := wgl.SliceToByteSlice(uint8Array)
-
-				floatData := make([]float32, len(bytes)/4)
-				for i := range floatData {
-					floatData[i] = math.Float32frombits(binary.LittleEndian.Uint32(bytes[i*4:]))
-				}
-
-				sg.AudioBufferLock.Lock()
-				sg.AudioBuffer = append(sg.AudioBuffer, floatData...)
-				if len(sg.AudioBuffer) > sg.BufferSize {
-					sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-sg.BufferSize:]
-				}
-				sg.AudioBufferLock.Unlock()
-
+		if data.Type() == js.TypeString {
+			base64Data := data.String()
+			bytes, err := base64.StdEncoding.DecodeString(base64Data)
+			if err != nil {
+				log.Println("Failed to decode base64 data:", err)
 				return nil
-			}))
-			reader.Call("readAsArrayBuffer", data)
-		} else if data.InstanceOf(js.Global().Get("ArrayBuffer")) {
-			uint8Array := js.Global().Get("Uint8Array").New(data)
-			bytes := wgl.SliceToByteSlice(uint8Array)
-
-			floatData := make([]float32, len(bytes)/4)
-			for i := range floatData {
-				floatData[i] = math.Float32frombits(binary.LittleEndian.Uint32(bytes[i*4:]))
 			}
-
-			sg.AudioBufferLock.Lock()
-			sg.AudioBuffer = append(sg.AudioBuffer, floatData...)
-			if len(sg.AudioBuffer) > sg.BufferSize {
-				sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-sg.BufferSize:]
-			}
-			sg.AudioBufferLock.Unlock()
+			processFloat32Data(bytes)
 		} else {
-			log.Printf("Received data of type: %s", data.Get("constructor").Get("name").String())
+			log.Printf("Received data of unexpected type: %s", data.Type().String())
 		}
 
 		return nil
 	}))
 
 	wskt = ws
+}
+
+func processFloat32Data(bytes []byte) {
+	floatData := make([]float32, len(bytes)/4)
+	for i := range floatData {
+		floatData[i] = math.Float32frombits(uint32(bytes[i*4]) | uint32(bytes[i*4+1])<<8 | uint32(bytes[i*4+2])<<16 | uint32(bytes[i*4+3])<<24)
+	}
+
+	sg.AudioBufferLock.Lock()
+	sg.AudioBuffer = append(sg.AudioBuffer, floatData...)
+	if len(sg.AudioBuffer) > sg.BufferSize {
+		sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-sg.BufferSize:]
+	}
+	sg.AudioBufferLock.Unlock()
 }
 
 func initGL() {
@@ -119,16 +96,21 @@ func initGL() {
 		log.Fatal("Canvas element with ID 'gocanvas' not found")
 		return
 	}
-	wVal := c.Get("clientWidth")
-	hVal := c.Get("clientHeight")
-	log.Printf("clientWidth: %s ; clientHeight: %s", wVal.String(), hVal.String())
 
-	if wVal.IsUndefined() || hVal.IsUndefined() {
-		log.Fatal("Failed to get canvas dimensions")
-		return
-	}
-	w = wVal.Int()
-	h = hVal.Int()
+	// Use window.innerWidth and window.innerHeight instead of clientWidth and clientHeight
+	//	wVal := js.Global().Get("window").Get("innerWidth")
+	//	hVal := js.Global().Get("window").Get("innerHeight")
+	//	log.Printf("window.innerWidth: %s ; window.innerHeight: %s", wVal.String(), hVal.String())
+
+	//	if wVal.IsUndefined() || hVal.IsUndefined() {
+	//		log.Fatal("Failed to get window dimensions")
+	//		return
+	//	}
+
+	//	w = wVal.Int()
+	//	h = hVal.Int()
+	w = 600
+	h = 512
 	c.Set("width", w)
 	c.Set("height", h)
 	gl = c.Call("getContext", "webgl")

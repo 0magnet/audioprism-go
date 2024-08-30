@@ -38,6 +38,8 @@ test: ## Run tests if test files are present
 	go run cmd/audioprism/audioprism.go --help
 	go run cmd/fyne/fyne.go --help
 	go run cmd/gomobile/gomobile.go --help
+	go run cmd/gomobile-ws/gomobile-ws.go --help
+	go run cmd/wasm/wasm.go --help
 
 format: tidy ## Formats the code. Requires goimports and goimports-reviser
 	$(LINT_OPTS) goimports -w -local $(PROJECT_BASE) ./pkg ./cmd

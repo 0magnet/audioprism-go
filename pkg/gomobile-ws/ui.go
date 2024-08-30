@@ -2,6 +2,7 @@
 package gomobilews
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"log"
 	"math"
@@ -54,17 +55,27 @@ func Run(width, height int, fpsDisplay bool) {
 	// Start listening to WebSocket in a separate goroutine
 	go func() {
 		for {
-			var data []byte
-			err := websocket.Message.Receive(ws, &data)
+			var encodedData string
+			err := websocket.Message.Receive(ws, &encodedData)
 			if err != nil {
 				log.Println("Error receiving WebSocket data:", err)
+				continue
+			}
+
+			// Decode Base64 data back to []byte
+			data, err := base64.StdEncoding.DecodeString(encodedData)
+			if err != nil {
+				log.Println("Error decoding Base64 data:", err)
 				continue
 			}
 
 			// Convert received []byte data back to []float32
 			floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
 			for i := range floatData {
-				floatData[i] = math.Float32frombits(binary.LittleEndian.Uint32(data[i*4:]))
+				floatData[i] = math.Float32frombits(uint32(data[i*4]) |
+					uint32(data[i*4+1])<<8 |
+					uint32(data[i*4+2])<<16 |
+					uint32(data[i*4+3])<<24)
 			}
 
 			audioBufferLock.Lock()

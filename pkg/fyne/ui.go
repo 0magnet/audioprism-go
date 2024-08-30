@@ -127,8 +127,8 @@ func Run(upd int) {
 
 			currentRow := make([]color.Color, currentHeight)
 			for y := 0; y < currentHeight; y++ {
-				freq := float64(y) / float64(currentHeight) * spectrogram.MaxFrequency
-				bin := int(freq * float64(spectrogram.FFTSize) / (spectrogram.SampleRate / 2.0))
+				freq := float64(y) / float64(currentHeight) * 11025
+				bin := int(freq * float64(spectrogram.FFTSize) / 44100)
 				if bin < len(magnitudes) {
 					magnitude := magnitudes[bin]
 					currentRow[y] = spectrogram.MagnitudeToPixel(magnitude)
