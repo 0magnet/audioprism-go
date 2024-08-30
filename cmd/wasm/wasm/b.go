@@ -12,17 +12,12 @@ import (
 )
 
 var (
-	w, h      int
-	gl        js.Value
-	t         js.Value
-	sHist     [][]byte
-	wskt      js.Value //nolint
-	rndrFr    js.Func
-	sP        js.Value
-	glTypes   wgl.GLTypes
-	uSampler  js.Value
-	vPos      js.Value
-	vTexCoord js.Value
+	w, h                                       int
+	bufferSize                                 = 32768
+	gl, t, wskt, sP, uSampler, vPos, vTexCoord js.Value //nolint:unused
+	sHist                                      [][]byte
+	rndrFr                                     js.Func
+	glTypes                                    wgl.GLTypes
 )
 
 func main() {
@@ -82,8 +77,8 @@ func processFloat32Data(bytes []byte) {
 
 	sg.AudioBufferLock.Lock()
 	sg.AudioBuffer = append(sg.AudioBuffer, floatData...)
-	if len(sg.AudioBuffer) > sg.BufferSize {
-		sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-sg.BufferSize:]
+	if len(sg.AudioBuffer) > bufferSize {
+		sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-bufferSize:]
 	}
 	sg.AudioBufferLock.Unlock()
 }

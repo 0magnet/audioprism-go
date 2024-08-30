@@ -24,7 +24,7 @@ var updateRate int
 
 // Run initializes and starts the Fyne application for spectrogram visualization.
 // It sets up audio recording, updates the spectrogram, and displays the result in a window.
-func Run(upd int) {
+func Run(upd, bufferSize int) {
 	updateRate = upd
 	c, err := pulse.NewClient()
 	if err != nil {
@@ -37,8 +37,8 @@ func Run(upd int) {
 	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
 		audioBufferLock.Lock()
 		spectrogram.AudioBuffer = append(spectrogram.AudioBuffer, p...)
-		if len(spectrogram.AudioBuffer) > spectrogram.BufferSize {
-			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-spectrogram.BufferSize:]
+		if len(spectrogram.AudioBuffer) > bufferSize {
+			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-bufferSize:]
 		}
 		audioBufferLock.Unlock()
 		return len(p), nil

@@ -12,9 +12,6 @@ import (
 )
 
 const (
-	// BufferSize is the size of the audio buffer.
-	BufferSize = 32768
-
 	// FFTSize is the size of the FFT window.
 	FFTSize = 1024
 

@@ -1,13 +1,13 @@
+// Package commands cmd/wasm/commands/root.go
+//
 //go:generate bash -c "cp -b /usr/lib/go/misc/wasm/wasm_exec.js wasm_exec.js ; [[ -f 'wasm_exec.js~' ]] && rm wasm_exec.js~"
 //go:generate bash -c "GOOS=js GOARCH=wasm go build -o bundle.wasm ../wasm/b.go"
-
 package commands
 
 import (
 	"bytes"
 	_ "embed"
 	"encoding/base64"
-	"encoding/binary"
 	"fmt"
 	htmpl "html/template"
 	"log"
@@ -71,6 +71,7 @@ func init() {
 
 }
 
+// RootCmd is the root cli command
 var RootCmd = &cobra.Command{
 	Use:   "wasm",
 	Short: "with wasm via websockets",
@@ -107,13 +108,17 @@ var RootCmd = &cobra.Command{
 			if err != nil {
 				msg := fmt.Sprintf("Error parsing html template indexHtmpl:\n%s\n%v\n", indexHtmpl, err)
 				fmt.Println(msg)
-				c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+				_, err = c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+				if err != nil {
+					log.Println(err.Error())
+					return
+				}
 				c.Writer.Flush()
 				return
 			}
 
 			if devMode {
-				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript)
+				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript) //nolint
 				if tinyGo {
 					htmlPageTemplateData.Title = "audioprism-go WASM tinygo dev mode"
 					wasmData, err = script.Exec(`bash -c 'GOOS=js GOARCH=wasm tinygo build -target wasm -o /dev/stdout ` + wasmPath + `'`).Bytes()
@@ -124,14 +129,18 @@ var RootCmd = &cobra.Command{
 				if err != nil {
 					msg := fmt.Sprintf("Could not compile or read wasm file:\n%s\n%v\n", string(wasmData), err)
 					fmt.Println(msg)
-					c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+					_, err = c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+					if err != nil {
+						log.Println(err.Error())
+						return
+					}
 					c.Writer.Flush()
 					return
 				}
 				htmlPageTemplateData.WasmBase64 = base64.StdEncoding.EncodeToString(wasmData)
 			} else {
 				htmlPageTemplateData.Title = "audioprism-go WASM"
-				htmlPageTemplateData.WasmExecJs = htmpl.JS(string(wasmExecJs))
+				htmlPageTemplateData.WasmExecJs = htmpl.JS(string(wasmExecJs)) //nolint
 				htmlPageTemplateData.WasmBase64 = base64.StdEncoding.EncodeToString(wasmBinary)
 			}
 
@@ -143,11 +152,19 @@ var RootCmd = &cobra.Command{
 			if err != nil {
 				msg := fmt.Sprintf("Could not execute html template %v\n", err)
 				fmt.Println(msg)
-				c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+				_, err = c.Writer.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title></head><body style='background-color: black; color: white;'><div>%s</div></body></html>`, strings.ReplaceAll(msg, "\n", "<br>"))))
+				if err != nil {
+					log.Println(err.Error())
+					return
+				}
 				c.Writer.Flush()
 				return
 			}
-			c.Writer.Write(result.Bytes())
+			_, err = c.Writer.Write(result.Bytes())
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
 			c.Writer.Flush()
 		})
 
@@ -159,7 +176,10 @@ var RootCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			fmt.Printf("listening on http://127.0.0.1:%d using gin router\n", webPort)
-			r1.Run(fmt.Sprintf(":%d", webPort))
+			err = r1.Run(fmt.Sprintf(":%d", webPort))
+			if err != nil {
+				log.Println(err.Error())
+			}
 			wg.Done()
 		}()
 		wg.Wait()
@@ -167,7 +187,11 @@ var RootCmd = &cobra.Command{
 }
 
 func wsHandler(ws *websocket.Conn) {
-	defer ws.Close()
+	defer func() {
+		if err := ws.Close(); err != nil {
+			log.Println("Error closing WebSocket:", err)
+		}
+	}()
 
 	c, err := pulse.NewClient()
 	if err != nil {
@@ -216,18 +240,6 @@ func float32SliceToBase64String(floats []float32) string {
 	return base64.StdEncoding.EncodeToString(byteSlice)
 }
 
-func float32SliceToByteSlice(floats []float32) []byte {
-	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.LittleEndian, floats)
-	if err != nil {
-		log.Printf("binary.Write failed: %v", err)
-	}
-	return buf.Bytes()
-}
-
-type GinHandler struct{ Router *gin.Engine }
-
-func (h *GinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) { h.Router.ServeHTTP(w, r) }
 func loggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -276,17 +288,9 @@ func getMethodColor(method string) string {
 		return reset
 	}
 }
+
 func resetColor() string { return reset }
 
-type consoleColorModeValue int
-
-var consoleColorMode = autoColor
-
-const (
-	autoColor consoleColorModeValue = iota
-	disableColor
-	forceColor
-)
 const (
 	green   = "\033[97;42m"
 	white   = "\033[90;47m"

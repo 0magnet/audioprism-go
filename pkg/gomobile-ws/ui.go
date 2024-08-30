@@ -1,4 +1,4 @@
-// Package gomobile implements UI
+// Package gomobilews implements gomobile UI with websocket
 package gomobilews
 
 import (
@@ -35,7 +35,7 @@ var (
 )
 
 // Run initializes and starts the Gomobile application
-func Run(width, height int, fpsDisplay bool) {
+func Run(width, height, bufferSize int, fpsDisplay bool) {
 	spectrogramWidth = width
 	spectrogramHeight = height
 	showFPS = fpsDisplay
@@ -50,7 +50,11 @@ func Run(width, height int, fpsDisplay bool) {
 	if err != nil {
 		log.Fatal("WebSocket connection failed:", err)
 	}
-	defer ws.Close()
+	defer func() {
+		if err := ws.Close(); err != nil {
+			log.Println("Error closing WebSocket:", err)
+		}
+	}()
 
 	// Start listening to WebSocket in a separate goroutine
 	go func() {
@@ -80,8 +84,8 @@ func Run(width, height int, fpsDisplay bool) {
 
 			audioBufferLock.Lock()
 			spectrogram.AudioBuffer = append(spectrogram.AudioBuffer, floatData...)
-			if len(spectrogram.AudioBuffer) > spectrogram.BufferSize {
-				spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-spectrogram.BufferSize:]
+			if len(spectrogram.AudioBuffer) > bufferSize {
+				spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-bufferSize:]
 			}
 			audioBufferLock.Unlock()
 		}

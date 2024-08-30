@@ -33,7 +33,7 @@ var (
 )
 
 // Run initializes and starts the Gomobile application
-func Run(width, height int, fpsDisplay bool) {
+func Run(width, height, bufferSize int, fpsDisplay bool) {
 	spectrogramWidth = width
 	spectrogramHeight = height
 	showFPS = fpsDisplay
@@ -52,8 +52,8 @@ func Run(width, height int, fpsDisplay bool) {
 	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
 		audioBufferLock.Lock()
 		spectrogram.AudioBuffer = append(spectrogram.AudioBuffer, p...)
-		if len(spectrogram.AudioBuffer) > spectrogram.BufferSize {
-			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-spectrogram.BufferSize:]
+		if len(spectrogram.AudioBuffer) > bufferSize {
+			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-bufferSize:]
 		}
 		audioBufferLock.Unlock()
 		return len(p), nil
