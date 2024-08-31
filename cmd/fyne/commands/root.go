@@ -8,12 +8,14 @@ import (
 )
 
 var (
-	bufferSize, updateRate int
+	w, h, u, b int
 )
 
 func init() {
-	RootCmd.Flags().IntVarP(&updateRate, "up", "u", 60, "Update rate")
-	RootCmd.Flags().IntVarP(&bufferSize, "buf", "b", 32768, "size of audio buffer")
+	RootCmd.Flags().IntVarP(&w, "width", "x", 800, "initial window width")
+	RootCmd.Flags().IntVarP(&h, "height", "y", 600, "initial window height")
+	RootCmd.Flags().IntVarP(&u, "up", "u", 60, "fps rate - 0 unlimits")
+	RootCmd.Flags().IntVarP(&b, "buf", "b", 32768, "size of audio buffer")
 }
 
 // RootCmd contains the root command
@@ -26,6 +28,6 @@ var RootCmd = &cobra.Command{
 	└   ┴ ┘└┘└─┘
 	` + "Audio Spectrogram Visualization with Fyne GUI",
 	Run: func(_ *cobra.Command, _ []string) {
-		ui.Run(updateRate, bufferSize)
+		ui.Run(w, h, u, b)
 	},
 }

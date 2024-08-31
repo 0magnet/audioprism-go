@@ -23,9 +23,6 @@ const (
 
 	// MaxMagnitude is the maximum magnitude value for normalization.
 	MaxMagnitude = 45.0
-
-	// LogMagnitude sets linear or logrithmic magnituide of color gradient
-	LogMagnitude = true
 )
 
 // AudioBuffer stores the audio samples for processing.
@@ -59,7 +56,7 @@ func ValueToPixelHeat(value float64) color.Color {
 		g = uint8(255 - 255.0*Normalize(value, 3.0/5.0, 4.0/5.0))
 		b = 0
 	} else {
-		c := uint8(255.0 * Normalize(value, 4.0/5.0, 1.0)) // Changed 5.0/5.0 to 1.0
+		c := uint8(255.0 * Normalize(value, 4.0/5.0, 1.0))
 		r = 255
 		g = c
 		b = c
@@ -92,17 +89,15 @@ func ValueToPixelGrayscale(value float64) color.Color {
 
 // MagnitudeToPixel converts a magnitude value to a pixel color.
 func MagnitudeToPixel(value float64) color.Color {
-	if LogMagnitude {
-		value = 20 * math.Log10(value+1e-10)
-	}
+	value = 20 * math.Log10(value+1e-10)
 	return ValueToPixelHeat(Normalize(value, MinMagnitude, MaxMagnitude))
 }
 
 // ComputeFFT computes the FFT of the input and returns the magnitudes.
 func ComputeFFT(input []float32) []float64 {
-	hammingWindow := window.Hann(FFTSize)
-	windowedBuffer := make([]float64, FFTSize)
-	for i := 0; i < FFTSize; i++ {
+	hammingWindow := window.Hann(len(input))
+	windowedBuffer := make([]float64, len(input))
+	for i := 0; i < len(input); i++ {
 		windowedBuffer[i] = float64(input[i]) * hammingWindow[i]
 	}
 

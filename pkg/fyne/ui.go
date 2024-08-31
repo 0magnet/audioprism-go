@@ -1,4 +1,3 @@
-// Package fyneui implements a UI for visualizing a spectrogram using the Fyne GUI library.
 package fyneui
 
 import (
@@ -7,7 +6,6 @@ import (
 	"image/draw"
 	"log"
 	"strconv"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,50 +17,29 @@ import (
 	"github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
 
-//var updateRate int
-
-// Run initializes and starts the Fyne application for spectrogram visualization.
-// It sets up audio recording, updates the spectrogram, and displays the result in a window.
-func Run(_, bufferSize int) {
-	//	updateRate = upd
-	c, err := pulse.NewClient()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	defer c.Close()
-
-	var audioBufferLock sync.Mutex
-
-	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
-		audioBufferLock.Lock()
-		spectrogram.AudioBuffer = append(spectrogram.AudioBuffer, p...)
-		if len(spectrogram.AudioBuffer) > bufferSize {
-			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-bufferSize:]
-		}
-		audioBufferLock.Unlock()
-		return len(p), nil
-	}))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	stream.Start()
-
+// Run initializes and starts the Fyne application
+func Run(width, height, _, _ int) {
 	a := app.New()
 	w := a.NewWindow("audioprism-go")
-
-	var spectrogramHistory [][]color.Color
-	var currentWidth, currentHeight int
-	var historyIndex int
+	spectrogramHistory := make([][]color.Color, width)
+	historyIndex := 0
+	for i := range spectrogramHistory {
+		spectrogramHistory[i] = make([]color.Color, height)
+		for j := range spectrogramHistory[i] {
+			spectrogramHistory[i][j] = color.Black
+		}
+	}
 
 	img := canvas.NewRaster(func(w, h int) image.Image {
-		if w != currentWidth || h != currentHeight {
-			currentWidth = w
-			currentHeight = h
+		if w != width || h != height {
+			width = w
+			height = h
+		}
 
-			spectrogramHistory = make([][]color.Color, currentWidth)
+		if len(spectrogramHistory) != width {
+			spectrogramHistory = make([][]color.Color, width)
 			for i := range spectrogramHistory {
-				spectrogramHistory[i] = make([]color.Color, currentHeight)
+				spectrogramHistory[i] = make([]color.Color, height)
 				for j := range spectrogramHistory[i] {
 					spectrogramHistory[i][j] = color.Black
 				}
@@ -73,60 +50,30 @@ func Run(_, bufferSize int) {
 		rgba := image.NewRGBA(image.Rect(0, 0, w, h))
 		draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.Black}, image.Point{}, draw.Src)
 
-		for x := 0; x < currentWidth; x++ {
-			for y := 0; y < currentHeight; y++ {
-				rgba.Set(x, h-1-y, spectrogramHistory[(x+historyIndex)%currentWidth][y])
+		for x := 0; x < width; x++ {
+			index := (historyIndex + x) % width
+			for y := 0; y < height; y++ {
+				rgba.Set(x, h-1-y, spectrogramHistory[index][y])
 			}
 		}
 
 		return rgba
 	})
 
-	fpsText := canvas.NewText("FPS: 0", color.RGBA{255, 0, 0, 255})
-	fpsText.Alignment = fyne.TextAlignTrailing
-
-	overlay := container.NewWithoutLayout(fpsText)
-
-	// Replace deprecated container.NewMax with container.NewStack
-	mainContainer := container.NewStack(img, overlay)
-	w.SetContent(mainContainer)
-
-	ticker := time.NewTicker(time.Duration(1000/120) * time.Millisecond)
-	defer ticker.Stop()
-
-	go func() {
-		startTime := time.Now()
-		var framecount int
-		var fps float64
-		for range ticker.C {
-
-			img.Refresh()
-			framecount++
-
-			fpsText.Move(fyne.NewPos(mainContainer.Size().Width-fpsText.MinSize().Width-10, 10))
-
-			if time.Now().Sub(startTime) > time.Second {
-				fps = float64(framecount) / time.Now().Sub(startTime).Seconds()
-				startTime = time.Now()
-				framecount = 0
-			}
-			fpsText.Text = "FPS: " + strconv.FormatFloat(fps, 'f', 2, 64)
-			fpsText.Refresh()
-		}
-	}()
-
-	go func() {
-		for range ticker.C {
-			chunk := spectrogram.GetAudioChunk()
-			if chunk == nil {
-				continue
-			}
-
-			magnitudes := spectrogram.ComputeFFT(chunk)
-
-			currentRow := make([]color.Color, currentHeight)
-			for y := 0; y < currentHeight; y++ {
-				freq := float64(y) / float64(currentHeight) * 11025
+	c, err := pulse.NewClient()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer c.Close()
+	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
+		start := 0
+		step := spectrogram.FFTSize / 2
+		for len(p)-start >= spectrogram.FFTSize {
+			magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
+			start += step
+			currentRow := make([]color.Color, height)
+			for y := 0; y < height; y++ {
+				freq := float64(y) / float64(height) * 12000
 				bin := int(freq * float64(spectrogram.FFTSize) / 44100)
 				if bin < len(magnitudes) {
 					magnitude := magnitudes[bin]
@@ -135,18 +82,44 @@ func Run(_, bufferSize int) {
 					currentRow[y] = color.Black
 				}
 			}
+			spectrogramHistory[historyIndex] = currentRow
+			historyIndex = (historyIndex + 1) % width
 
-			if historyIndex < currentWidth {
-				spectrogramHistory[historyIndex] = currentRow
-				historyIndex++
-			} else {
-				copy(spectrogramHistory, spectrogramHistory[1:])
-				spectrogramHistory[currentWidth-1] = currentRow
+		}
+		return len(p), nil
+	}), pulse.RecordLatency(0.1))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fpsText := canvas.NewText("FPS: 0", color.RGBA{255, 0, 0, 255})
+	fpsText.Alignment = fyne.TextAlignTrailing
+	overlay := container.NewWithoutLayout(fpsText)
+	mainContainer := container.NewStack(img, overlay)
+	w.SetContent(mainContainer)
+	ticker := time.NewTicker(time.Duration(1000/60) * time.Millisecond)
+	defer ticker.Stop()
+
+	go func() {
+		startTime := time.Now()
+		var framecount int
+		var fps float64
+		fpsText.Move(fyne.NewPos(mainContainer.Size().Width-fpsText.MinSize().Width-10, 10))
+		for range ticker.C {
+			framecount++
+			img.Refresh()
+			if time.Now().Sub(startTime) > 2*time.Second {
+				fps = float64(framecount) / time.Now().Sub(startTime).Seconds()
+				startTime = time.Now()
+				framecount = 0
+				fpsText.Text = "FPS: " + strconv.FormatFloat(fps, 'f', 2, 64)
+				fpsText.Refresh()
 			}
 		}
 	}()
 
 	w.Resize(fyne.NewSize(800, 600))
+	stream.Start()
 	w.ShowAndRun()
 
 	stream.Stop()
