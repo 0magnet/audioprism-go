@@ -76,9 +76,10 @@ var RootCmd = &cobra.Command{
 	Use:   "wasm",
 	Short: "with wasm via websockets",
 	Long: `
-	┬ ┬┌─┐┌─┐┌┬┐
-	│││├─┤└─┐│││
-	└┴┘┴ ┴└─┘┴ ┴`,
+	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
+	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
+	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
+	` + "Audio Spectrogram Visualization in Webassembly",
 	Run: func(_ *cobra.Command, _ []string) {
 		if tinyGo {
 			devMode = true

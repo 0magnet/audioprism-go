@@ -1,7 +1,4 @@
-// cmd/skywire/skywire.go
-/*
-skywire
-*/
+// cmd/audioprism/audioprism.go
 package main
 
 import (
@@ -26,8 +23,23 @@ func init() {
 		wasm.RootCmd,
 	)
 	fyneui.RootCmd.Use = "f"
+	fyneui.RootCmd.Long = `
+		┌─┐┬ ┬┌┐┌┌─┐
+		├┤ └┬┘│││├┤
+		└   ┴ ┘└┘└─┘
+		` + "Audio Spectrogram Visualization with Fyne GUI"
 	gomobileui.RootCmd.Use = "m"
+	gomobileui.RootCmd.Long = `
+		┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
+		│ ┬│ │││││ │├┴┐││  ├┤
+		└─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
+		` + "Audio Spectrogram Visualization with golang.org/x/mobile GUI"
 	wasm.RootCmd.Use = "w"
+	wasm.RootCmd.Long = `
+		┬ ┬┌─┐┌─┐┌┬┐
+		│││├─┤└─┐│││
+		└┴┘┴ ┴└─┘┴ ┴
+		` + "Audio Spectrogram Visualization in Webassembly"
 	var helpflag bool
 	RootCmd.SetUsageTemplate(help)
 	RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help for "+RootCmd.Use)

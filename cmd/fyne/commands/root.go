@@ -27,9 +27,9 @@ var RootCmd = &cobra.Command{
 	Use:   "fyne",
 	Short: "with Fyne GUI",
 	Long: `
-	┌─┐┬ ┬┌┐┌┌─┐
-	├┤ └┬┘│││├┤
-	└   ┴ ┘└┘└─┘
+	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
+	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
+	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
 	` + "Audio Spectrogram Visualization with Fyne GUI",
 	Run: func(_ *cobra.Command, _ []string) {
 		ui.Run(w, h, u, b, s, k)

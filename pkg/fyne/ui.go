@@ -1,33 +1,31 @@
+// Package fyneui pkg/fyne/ui.go
 package fyneui
 
 import (
 	"encoding/base64"
-	"math"
-
 	"image"
 	"image/color"
 	"image/draw"
 	"log"
+	"math"
+	"net/url"
 	"strconv"
 	"time"
-	"net/url"
-	"golang.org/x/net/websocket"
-
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"github.com/jfreymuth/pulse"
+	"golang.org/x/net/websocket"
 
 	"github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
 
 var (
 	spectrogramHistory [][]color.Color
-	historyIndex                        int
-	width, height int
-
+	historyIndex       int
+	width, height      int
 )
 
 // Run initializes and starts the Fyne application
@@ -74,7 +72,6 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 
 		return rgba
 	})
-
 
 	var stream *pulse.RecordStream
 	if wsURL == "" {
@@ -157,16 +154,20 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 		startTime := time.Now()
 		var framecount int
 		var fps float64
-		fpsText.Move(fyne.NewPos(mainContainer.Size().Width-fpsText.MinSize().Width-10, 10))
+		if fpsDisp {
+			fpsText.Move(fyne.NewPos(mainContainer.Size().Width-fpsText.MinSize().Width-10, 10))
+		}
 		for range ticker.C {
-			framecount++
 			img.Refresh()
-			if time.Now().Sub(startTime) > 2*time.Second {
-				fps = float64(framecount) / time.Now().Sub(startTime).Seconds()
-				startTime = time.Now()
-				framecount = 0
-				fpsText.Text = "FPS: " + strconv.FormatFloat(fps, 'f', 2, 64)
-				fpsText.Refresh()
+			if fpsDisp {
+				framecount++
+				if time.Since(startTime) > 2*time.Second {
+					fps = float64(framecount) / time.Since(startTime).Seconds()
+					startTime = time.Now()
+					framecount = 0
+					fpsText.Text = "FPS: " + strconv.FormatFloat(fps, 'f', 2, 64)
+					fpsText.Refresh()
+				}
 			}
 		}
 	}()

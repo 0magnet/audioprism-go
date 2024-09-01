@@ -1,3 +1,5 @@
+//go:build js && wasm
+
 // Package wgl pkg/wgl/wgl.go
 package wgl
 
@@ -132,6 +134,8 @@ func SliceToByteSlice(s interface{}) []byte {
 	default:
 		panic("jsutil: unexpected value at sliceToBytesSlice: " + js.ValueOf(s).Type().String()) //nolint
 	}
+	return []byte{}
+
 }
 
 // SliceToTypedArray converts slice to typed array
@@ -187,4 +191,5 @@ func SliceToTypedArray(s interface{}) js.Value {
 	default:
 		panic("jsutil: unexpected value at SliceToTypedArray: " + js.ValueOf(s).Type().String())
 	}
+	return js.Value{}
 }

@@ -1,3 +1,5 @@
+//go:build js && wasm
+
 // Package main cmd/wasm/wasm/b.go
 package main
 
@@ -18,7 +20,7 @@ var (
 	sHistIndex                                 int
 	rndrFr                                     js.Func
 	glTypes                                    wgl.GLTypes
-	historySize                                int = 600 // Example fixed size; adjust as needed
+	historySize                                = 600
 )
 
 func main() {

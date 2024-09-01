@@ -28,11 +28,11 @@ var RootCmd = &cobra.Command{
 	Use:   "mobile",
 	Short: "with golang.org/x/mobile GUI",
 	Long: `
-	┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
-	│ ┬│ │││││ │├┴┐││  ├┤
-	└─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
+	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
+	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
+	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
 	` + "Audio Spectrogram Visualization with golang.org/x/mobile GUI",
 	Run: func(_ *cobra.Command, _ []string) {
-			ui.Run(w, h, u, b, s, k)
+		ui.Run(w, h, u, b, s, k)
 	},
 }

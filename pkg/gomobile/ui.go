@@ -1,3 +1,4 @@
+// Package gomobile pkg/gomobile/ui.go
 package gomobile
 
 import (
@@ -6,7 +7,6 @@ import (
 	"log"
 	"math"
 	"net/url"
-
 
 	"github.com/jfreymuth/pulse"
 	"golang.org/x/mobile/app"
@@ -23,16 +23,16 @@ import (
 )
 
 var (
-	images                              *glutil.Images
-	fps                                 *debug.FPS
-	program                             gl.Program
-	position                            gl.Attrib
-	texCoord                            gl.Attrib
-	texture                             gl.Texture
-	spectrogramHistory                  [][]byte
-	historyIndex                        int
-	width, height int
-	showFPS                             bool
+	images             *glutil.Images
+	fps                *debug.FPS
+	program            gl.Program
+	position           gl.Attrib
+	texCoord           gl.Attrib
+	texture            gl.Texture
+	spectrogramHistory [][]byte
+	historyIndex       int
+	width, height      int
+	showFPS            bool
 )
 
 // Run initializes and starts the Gomobile application
@@ -46,74 +46,74 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 	for i := range spectrogramHistory {
 		spectrogramHistory[i] = make([]byte, height*4) // RGBA
 	}
-var stream *pulse.RecordStream
-if wsURL == "" {
-	// Initialize PulseAudio client and stream
-	audioCtx, err := pulse.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer audioCtx.Close()
-
-	stream, err = audioCtx.NewRecord(pulse.Float32Writer(processAudio), pulse.RecordLatency(0.1))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stream.Stop()
-} else {
-	// Parse the WebSocket URL to determine the correct origin
-	u, err := url.Parse(wsURL)
-	if err != nil {
-		log.Fatal("Invalid WebSocket URL:", err)
-	}
-	origin := u.Scheme + "://" + u.Host
-
-	// Connect to WebSocket server using the provided URL and dynamic origin
-	ws, err := websocket.Dial(wsURL, "", origin)
-	if err != nil {
-		log.Fatal("WebSocket connection failed:", err)
-	}
-	defer func() {
-		if err := ws.Close(); err != nil {
-			log.Println("Error closing WebSocket:", err)
+	var stream *pulse.RecordStream
+	if wsURL == "" {
+		// Initialize PulseAudio client and stream
+		audioCtx, err := pulse.NewClient()
+		if err != nil {
+			log.Fatal(err)
 		}
-	}()
+		defer audioCtx.Close()
 
-	// Start listening to WebSocket in a separate goroutine
-	go func() {
-		for {
-			var encodedData string
-			err := websocket.Message.Receive(ws, &encodedData)
-			if err != nil {
-				log.Println("Error receiving WebSocket data:", err)
-				continue
-			}
-
-			// Decode Base64 data back to []byte
-			data, err := base64.StdEncoding.DecodeString(encodedData)
-			if err != nil {
-				log.Println("Error decoding Base64 data:", err)
-				continue
-			}
-
-			// Convert received []byte data back to []float32
-			floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
-			for i := range floatData {
-				floatData[i] = math.Float32frombits(uint32(data[i*4]) |
-					uint32(data[i*4+1])<<8 |
-					uint32(data[i*4+2])<<16 |
-					uint32(data[i*4+3])<<24)
-			}
-
-			// Process the audio data directly
-			_, err = processAudio(floatData)
-			if err != nil {
-				log.Fatal(err)
-			}
+		stream, err = audioCtx.NewRecord(pulse.Float32Writer(processAudio), pulse.RecordLatency(0.1))
+		if err != nil {
+			log.Fatal(err)
 		}
-	}()
+		defer stream.Stop()
+	} else {
+		// Parse the WebSocket URL to determine the correct origin
+		u, err := url.Parse(wsURL)
+		if err != nil {
+			log.Fatal("Invalid WebSocket URL:", err)
+		}
+		origin := u.Scheme + "://" + u.Host
 
-}
+		// Connect to WebSocket server using the provided URL and dynamic origin
+		ws, err := websocket.Dial(wsURL, "", origin)
+		if err != nil {
+			log.Fatal("WebSocket connection failed:", err)
+		}
+		defer func() {
+			if err := ws.Close(); err != nil {
+				log.Println("Error closing WebSocket:", err)
+			}
+		}()
+
+		// Start listening to WebSocket in a separate goroutine
+		go func() {
+			for {
+				var encodedData string
+				err := websocket.Message.Receive(ws, &encodedData)
+				if err != nil {
+					log.Println("Error receiving WebSocket data:", err)
+					continue
+				}
+
+				// Decode Base64 data back to []byte
+				data, err := base64.StdEncoding.DecodeString(encodedData)
+				if err != nil {
+					log.Println("Error decoding Base64 data:", err)
+					continue
+				}
+
+				// Convert received []byte data back to []float32
+				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+				for i := range floatData {
+					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
+						uint32(data[i*4+1])<<8 |
+						uint32(data[i*4+2])<<16 |
+						uint32(data[i*4+3])<<24)
+				}
+
+				// Process the audio data directly
+				_, err = processAudio(floatData)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}()
+
+	}
 
 	app.Main(func(a app.App) {
 		var glctx gl.Context
