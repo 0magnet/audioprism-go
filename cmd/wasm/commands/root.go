@@ -210,7 +210,7 @@ func wsHandler(ws *websocket.Conn) {
 			}
 		}
 		return len(p), nil
-	}))
+	}), pulse.RecordLatency(0.1))
 	if err != nil {
 		log.Fatal(err)
 	}

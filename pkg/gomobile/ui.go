@@ -1,10 +1,12 @@
-// Package gomobile implements UI
 package gomobile
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"log"
-	"sync"
+	"math"
+	"net/url"
+
 
 	"github.com/jfreymuth/pulse"
 	"golang.org/x/mobile/app"
@@ -15,6 +17,7 @@ import (
 	"golang.org/x/mobile/exp/f32"
 	"golang.org/x/mobile/exp/gl/glutil"
 	"golang.org/x/mobile/gl"
+	"golang.org/x/net/websocket"
 
 	"github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
@@ -27,42 +30,90 @@ var (
 	texCoord                            gl.Attrib
 	texture                             gl.Texture
 	spectrogramHistory                  [][]byte
-	audioBufferLock                     sync.Mutex
+	historyIndex                        int
 	spectrogramWidth, spectrogramHeight int
 	showFPS                             bool
 )
 
 // Run initializes and starts the Gomobile application
-func Run(width, height, bufferSize int, fpsDisplay bool) {
+func Run(width, height, _, _ int, fpsDisplay bool, wsURL string) {
 	spectrogramWidth = width
 	spectrogramHeight = height
 	showFPS = fpsDisplay
 
+	// Initialize the spectrogram history buffer
 	spectrogramHistory = make([][]byte, spectrogramWidth)
 	for i := range spectrogramHistory {
-		spectrogramHistory[i] = make([]byte, spectrogramHeight*4)
+		spectrogramHistory[i] = make([]byte, spectrogramHeight*4) // RGBA
 	}
-
-	c, err := pulse.NewClient()
+var stream *pulse.RecordStream
+if wsURL == "" {
+	// Initialize PulseAudio client and stream
+	audioCtx, err := pulse.NewClient()
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
-	defer c.Close()
+	defer audioCtx.Close()
 
-	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
-		audioBufferLock.Lock()
-		spectrogram.AudioBuffer = append(spectrogram.AudioBuffer, p...)
-		if len(spectrogram.AudioBuffer) > bufferSize {
-			spectrogram.AudioBuffer = spectrogram.AudioBuffer[len(spectrogram.AudioBuffer)-bufferSize:]
+	stream, err = audioCtx.NewRecord(pulse.Float32Writer(processAudio), pulse.RecordLatency(0.1))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stream.Stop()
+} else {
+	// Parse the WebSocket URL to determine the correct origin
+	u, err := url.Parse(wsURL)
+	if err != nil {
+		log.Fatal("Invalid WebSocket URL:", err)
+	}
+	origin := u.Scheme + "://" + u.Host
+
+	// Connect to WebSocket server using the provided URL and dynamic origin
+	ws, err := websocket.Dial(wsURL, "", origin)
+	if err != nil {
+		log.Fatal("WebSocket connection failed:", err)
+	}
+	defer func() {
+		if err := ws.Close(); err != nil {
+			log.Println("Error closing WebSocket:", err)
 		}
-		audioBufferLock.Unlock()
-		return len(p), nil
-	}))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	}()
 
-	stream.Start()
+	// Start listening to WebSocket in a separate goroutine
+	go func() {
+		for {
+			var encodedData string
+			err := websocket.Message.Receive(ws, &encodedData)
+			if err != nil {
+				log.Println("Error receiving WebSocket data:", err)
+				continue
+			}
+
+			// Decode Base64 data back to []byte
+			data, err := base64.StdEncoding.DecodeString(encodedData)
+			if err != nil {
+				log.Println("Error decoding Base64 data:", err)
+				continue
+			}
+
+			// Convert received []byte data back to []float32
+			floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+			for i := range floatData {
+				floatData[i] = math.Float32frombits(uint32(data[i*4]) |
+					uint32(data[i*4+1])<<8 |
+					uint32(data[i*4+2])<<16 |
+					uint32(data[i*4+3])<<24)
+			}
+
+			// Process the audio data directly
+			_, err = processAudio(floatData)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
+
+}
 
 	app.Main(func(a app.App) {
 		var glctx gl.Context
@@ -74,6 +125,7 @@ func Run(width, height, bufferSize int, fpsDisplay bool) {
 				case lifecycle.CrossOn:
 					glctx, _ = e.DrawContext.(gl.Context)
 					onStart(glctx)
+					stream.Start()
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					onStop(glctx)
@@ -85,53 +137,53 @@ func Run(width, height, bufferSize int, fpsDisplay bool) {
 				if glctx == nil || e.External {
 					continue
 				}
-
-				updateSpectrogramData(glctx)
 				onPaint(glctx, sz, showFPS)
 				a.Publish()
 				a.Send(paint.Event{})
 			}
 		}
 	})
-
-	stream.Stop()
 }
 
-func updateSpectrogramData(glctx gl.Context) {
-	audioBufferLock.Lock()
-	defer audioBufferLock.Unlock()
+func processAudio(p []float32) (int, error) {
+	start := 0
+	step := spectrogram.FFTSize / 2
+	for len(p)-start >= spectrogram.FFTSize {
+		magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
+		start += step
 
-	chunk := spectrogram.GetAudioChunk()
-	if chunk == nil {
-		return
+		newColumn := make([]byte, spectrogramHeight*4)
+		for y := 0; y < spectrogramHeight; y++ {
+			freq := float64(y) / float64(spectrogramHeight) * 12000
+			bin := int(freq * float64(spectrogram.FFTSize) / 44100)
+			if bin < len(magnitudes) {
+				magnitude := magnitudes[bin]
+				color := spectrogram.MagnitudeToPixel(magnitude)
+				r, g, b, a := color.RGBA()
+				newColumn[y*4+0] = byte(r >> 8)
+				newColumn[y*4+1] = byte(g >> 8)
+				newColumn[y*4+2] = byte(b >> 8)
+				newColumn[y*4+3] = byte(a >> 8)
+			} else {
+				newColumn[y*4+0] = 0
+				newColumn[y*4+1] = 0
+				newColumn[y*4+2] = 0
+				newColumn[y*4+3] = 255
+			}
+		}
+
+		// Shift history and insert the new column
+		copy(spectrogramHistory[0:], spectrogramHistory[1:])
+		spectrogramHistory[spectrogramWidth-1] = newColumn
 	}
-
-	magnitudes := spectrogram.ComputeFFT(chunk)
-	newColumn := make([]byte, spectrogramHeight*4)
-
-	for y := 0; y < spectrogramHeight; y++ {
-		color := spectrogram.MagnitudeToPixel(magnitudes[y])
-		r, g, b, a := color.RGBA()
-		newColumn[y*4+0] = byte(r >> 8)
-		newColumn[y*4+1] = byte(g >> 8)
-		newColumn[y*4+2] = byte(b >> 8)
-		newColumn[y*4+3] = byte(a >> 8)
-	}
-
-	copy(spectrogramHistory[0:], spectrogramHistory[1:])
-	spectrogramHistory[spectrogramWidth-1] = newColumn
-
-	glctx.BindTexture(gl.TEXTURE_2D, texture)
-	for i, column := range spectrogramHistory {
-		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, i, 0, 1, spectrogramHeight, gl.RGBA, gl.UNSIGNED_BYTE, column)
-	}
+	return len(p), nil
 }
 
 func onStart(glctx gl.Context) {
 	var err error
 	program, err = glutil.CreateProgram(glctx, vertexShader, fragmentShader)
 	if err != nil {
-		log.Printf("error creating GL program: %v", err)
+		log.Fatalf("error creating GL program: %v", err)
 		return
 	}
 
@@ -143,6 +195,7 @@ func onStart(glctx gl.Context) {
 		fps = debug.NewFPS(images)
 	}
 
+	// Initialize texture
 	texture = glctx.CreateTexture()
 	glctx.BindTexture(gl.TEXTURE_2D, texture)
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
@@ -195,6 +248,10 @@ func onPaint(glctx gl.Context, sz size.Event, showFPS bool) {
 	glctx.VertexAttribPointer(texCoord, 2, gl.FLOAT, false, 0, 0)
 
 	glctx.BindTexture(gl.TEXTURE_2D, texture)
+	for i, column := range spectrogramHistory {
+		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, i, 0, 1, spectrogramHeight, gl.RGBA, gl.UNSIGNED_BYTE, column)
+	}
+
 	glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
 	glctx.DisableVertexAttribArray(position)

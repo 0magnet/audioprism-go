@@ -13,11 +13,12 @@ import (
 
 var (
 	w, h                                       int
-	bufferSize                                 = 32768
 	gl, t, wskt, sP, uSampler, vPos, vTexCoord js.Value //nolint:unused
 	sHist                                      [][]byte
+	sHistIndex                                 int
 	rndrFr                                     js.Func
 	glTypes                                    wgl.GLTypes
+	historySize                                int = 600 // Example fixed size; adjust as needed
 )
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 	initGL()
 	initShaders()
 	spectexture()
+	initHist()
 	renderLoop()
 	select {}
 }
@@ -75,12 +77,25 @@ func processFloat32Data(bytes []byte) {
 		floatData[i] = math.Float32frombits(uint32(bytes[i*4]) | uint32(bytes[i*4+1])<<8 | uint32(bytes[i*4+2])<<16 | uint32(bytes[i*4+3])<<24)
 	}
 
-	sg.AudioBufferLock.Lock()
-	sg.AudioBuffer = append(sg.AudioBuffer, floatData...)
-	if len(sg.AudioBuffer) > bufferSize {
-		sg.AudioBuffer = sg.AudioBuffer[len(sg.AudioBuffer)-bufferSize:]
+	// Process the float data directly
+	updateSpectrogram(floatData)
+}
+
+func updateSpectrogram(floatData []float32) {
+	magnitudes := sg.ComputeFFT(floatData)
+	newColumn := make([]byte, h*4)
+
+	for y := 0; y < h; y++ {
+		color := sg.MagnitudeToPixel(magnitudes[y])
+		r, g, b, a := color.RGBA()
+		newColumn[y*4+0] = byte(r >> 8)
+		newColumn[y*4+1] = byte(g >> 8)
+		newColumn[y*4+2] = byte(b >> 8)
+		newColumn[y*4+3] = byte(a >> 8)
 	}
-	sg.AudioBufferLock.Unlock()
+
+	sHist[sHistIndex] = newColumn
+	sHistIndex = (sHistIndex + 1) % historySize
 }
 
 func initGL() {
@@ -92,18 +107,6 @@ func initGL() {
 		return
 	}
 
-	// Use window.innerWidth and window.innerHeight instead of clientWidth and clientHeight
-	//	wVal := js.Global().Get("window").Get("innerWidth")
-	//	hVal := js.Global().Get("window").Get("innerHeight")
-	//	log.Printf("window.innerWidth: %s ; window.innerHeight: %s", wVal.String(), hVal.String())
-
-	//	if wVal.IsUndefined() || hVal.IsUndefined() {
-	//		log.Fatal("Failed to get window dimensions")
-	//		return
-	//	}
-
-	//	w = wVal.Int()
-	//	h = hVal.Int()
 	w = 600
 	h = 512
 	c.Set("width", w)
@@ -172,41 +175,24 @@ func spectexture() {
 	gl.Call("texImage2D", glTypes.Texture2D, 0, glTypes.RGBA, w, h, 0, glTypes.RGBA, glTypes.UnsignedByte, js.Null())
 }
 
+func initHist() {
+	sHist = make([][]byte, historySize)
+	for i := range sHist {
+		sHist[i] = make([]byte, h*4)
+	}
+	sHistIndex = 0
+}
+
 func renderLoop() {
 	log.Println("Starting render loop")
 
 	rndrFr = js.FuncOf(func(this js.Value, args []js.Value) interface{} { //nolint
-		updateSD()
 		renderSpect()
 		js.Global().Call("requestAnimationFrame", rndrFr)
 		return nil
 	})
 
 	js.Global().Call("requestAnimationFrame", rndrFr)
-}
-
-func updateSD() {
-	chunk := sg.GetAudioChunk()
-	if chunk == nil {
-		return
-	}
-
-	magnitudes := sg.ComputeFFT(chunk)
-	newColumn := make([]byte, h*4)
-
-	for y := 0; y < h; y++ {
-		color := sg.MagnitudeToPixel(magnitudes[y])
-		r, g, b, a := color.RGBA()
-		newColumn[y*4+0] = byte(r >> 8)
-		newColumn[y*4+1] = byte(g >> 8)
-		newColumn[y*4+2] = byte(b >> 8)
-		newColumn[y*4+3] = byte(a >> 8)
-	}
-
-	if len(sHist) >= w {
-		sHist = sHist[1:]
-	}
-	sHist = append(sHist, newColumn)
 }
 
 func renderSpect() {
