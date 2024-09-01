@@ -14,6 +14,9 @@ check: lint test ## Run linters and tests
 build: ## Install dependencies, build binary
 	go build ./cmd/audioprism
 
+wasm: ## Update the included wasm binary and wasm_exec.js script with go generate
+	cd cmd/wasm/commands && go generate
+
 lint: ## Run linters
 	golangci-lint --version
 	golangci-lint run -c .golangci.yml  --exclude-files cmd/wasm/wasm/b.go --exclude-files pkg/wgl/wgl.go ./...
