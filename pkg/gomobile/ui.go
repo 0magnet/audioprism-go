@@ -59,6 +59,7 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		stream.Start()
 		defer stream.Stop()
 	} else {
 		// Parse the WebSocket URL to determine the correct origin
@@ -125,7 +126,6 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 				case lifecycle.CrossOn:
 					glctx, _ = e.DrawContext.(gl.Context)
 					onStart(glctx)
-					stream.Start()
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					onStop(glctx)

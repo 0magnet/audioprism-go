@@ -73,8 +73,12 @@ func init() {
 
 // RootCmd is the root cli command
 var RootCmd = &cobra.Command{
-	Use:   "wasm",
-	Short: "with wasm via websockets",
+	SilenceErrors:         true,
+	SilenceUsage:          true,
+	DisableSuggestions:    true,
+	DisableFlagsInUseLine: true,
+	Use:                   "wasm",
+	Short:                 "with wasm via websockets",
 	Long: `
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │

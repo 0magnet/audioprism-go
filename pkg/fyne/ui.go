@@ -74,9 +74,11 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 	})
 
 	var stream *pulse.RecordStream
+	var audioCtx *pulse.Client
 	if wsURL == "" {
 		// Initialize PulseAudio client and stream
-		audioCtx, err := pulse.NewClient()
+		var err error
+		audioCtx, err = pulse.NewClient()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -86,7 +88,11 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer stream.Stop()
+		defer func() {
+			if stream != nil {
+				stream.Stop()
+			}
+		}()
 	} else {
 		// Parse the WebSocket URL to determine the correct origin
 		u, err := url.Parse(wsURL)
@@ -113,6 +119,10 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 				err := websocket.Message.Receive(ws, &encodedData)
 				if err != nil {
 					log.Println("Error receiving WebSocket data:", err)
+					if err == websocket.ErrBadFrame {
+						// If the connection is closed, exit the goroutine
+						return
+					}
 					continue
 				}
 
@@ -139,7 +149,6 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 				}
 			}
 		}()
-
 	}
 
 	fpsText := canvas.NewText("FPS: 0", color.RGBA{255, 0, 0, 255})
@@ -173,8 +182,10 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 	}()
 
 	w.Resize(fyne.NewSize(800, 600))
-	stream.Start()
-	defer stream.Stop()
+	if stream != nil {
+		stream.Start()
+		defer stream.Stop()
+	}
 	w.ShowAndRun()
 }
 

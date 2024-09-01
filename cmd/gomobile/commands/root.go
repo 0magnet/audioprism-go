@@ -25,8 +25,12 @@ func init() {
 
 // RootCmd conta8ns the root cli command
 var RootCmd = &cobra.Command{
-	Use:   "mobile",
-	Short: "with golang.org/x/mobile GUI",
+	SilenceErrors:         true,
+	SilenceUsage:          true,
+	DisableSuggestions:    true,
+	DisableFlagsInUseLine: true,
+	Use:                   "mobile",
+	Short:                 "with golang.org/x/mobile GUI",
 	Long: `
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │

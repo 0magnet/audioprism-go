@@ -24,8 +24,12 @@ func init() {
 
 // RootCmd contains the root command
 var RootCmd = &cobra.Command{
-	Use:   "fyne",
-	Short: "with Fyne GUI",
+	SilenceErrors:         true,
+	SilenceUsage:          true,
+	DisableSuggestions:    true,
+	DisableFlagsInUseLine: true,
+	Use:                   "fyne",
+	Short:                 "with Fyne GUI",
 	Long: `
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │

@@ -39,6 +39,9 @@ test: ## Run tests if test files are present
 		echo "No test files found. Skipping tests."; \
 	fi
 	go run cmd/audioprism/audioprism.go --help
+	go run cmd/audioprism/audioprism.go f --help
+	go run cmd/audioprism/audioprism.go m --help
+	go run cmd/audioprism/audioprism.go w --help
 	go run cmd/fyne/fyne.go --help
 	go run cmd/gomobile/gomobile.go --help
 	go run cmd/wasm/wasm.go --help

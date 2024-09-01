@@ -24,22 +24,22 @@ func init() {
 	)
 	fyneui.RootCmd.Use = "f"
 	fyneui.RootCmd.Long = `
-		┌─┐┬ ┬┌┐┌┌─┐
-		├┤ └┬┘│││├┤
-		└   ┴ ┘└┘└─┘
-		` + "Audio Spectrogram Visualization with Fyne GUI"
+	┌─┐┬ ┬┌┐┌┌─┐
+	├┤ └┬┘│││├┤
+	└   ┴ ┘└┘└─┘
+	` + "Audio Spectrogram Visualization with Fyne GUI"
 	gomobileui.RootCmd.Use = "m"
 	gomobileui.RootCmd.Long = `
-		┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
-		│ ┬│ │││││ │├┴┐││  ├┤
-		└─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
-		` + "Audio Spectrogram Visualization with golang.org/x/mobile GUI"
+	┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
+	│ ┬│ │││││ │├┴┐││  ├┤
+	└─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
+	` + "Audio Spectrogram Visualization with golang.org/x/mobile GUI"
 	wasm.RootCmd.Use = "w"
 	wasm.RootCmd.Long = `
-		┬ ┬┌─┐┌─┐┌┬┐
-		│││├─┤└─┐│││
-		└┴┘┴ ┴└─┘┴ ┴
-		` + "Audio Spectrogram Visualization in Webassembly"
+	┬ ┬┌─┐┌─┐┌┬┐
+	│││├─┤└─┐│││
+	└┴┘┴ ┴└─┘┴ ┴
+	` + "Audio Spectrogram Visualization in Webassembly"
 	var helpflag bool
 	RootCmd.SetUsageTemplate(help)
 	RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help for "+RootCmd.Use)
@@ -52,6 +52,10 @@ func init() {
 
 // RootCmd contains literally every 'command' from four repos here
 var RootCmd = &cobra.Command{
+	SilenceErrors:         true,
+	SilenceUsage:          true,
+	DisableSuggestions:    true,
+	DisableFlagsInUseLine: true,
 	Use: func() string {
 		return strings.Split(filepath.Base(strings.ReplaceAll(strings.ReplaceAll(fmt.Sprintf("%v", os.Args), "[", ""), "]", "")), " ")[0]
 	}(),
@@ -61,10 +65,6 @@ var RootCmd = &cobra.Command{
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
 	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
 	` + "Audio Spectrogram Visualization",
-	SilenceErrors:         true,
-	SilenceUsage:          true,
-	DisableSuggestions:    true,
-	DisableFlagsInUseLine: true,
 }
 
 func main() {
