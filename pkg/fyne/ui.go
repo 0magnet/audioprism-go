@@ -1,12 +1,18 @@
 package fyneui
 
 import (
+	"encoding/base64"
+	"math"
+
 	"image"
 	"image/color"
 	"image/draw"
 	"log"
 	"strconv"
 	"time"
+	"net/url"
+	"golang.org/x/net/websocket"
+
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -17,12 +23,21 @@ import (
 	"github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
 
+var (
+	spectrogramHistory [][]color.Color
+	historyIndex                        int
+	width, height int
+
+)
+
 // Run initializes and starts the Fyne application
-func Run(width, height, _, _ int) {
+func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
+	width = wid
+	height = hei
 	a := app.New()
 	w := a.NewWindow("audioprism-go")
-	spectrogramHistory := make([][]color.Color, width)
-	historyIndex := 0
+	spectrogramHistory = make([][]color.Color, width)
+	historyIndex = 0
 	for i := range spectrogramHistory {
 		spectrogramHistory[i] = make([]color.Color, height)
 		for j := range spectrogramHistory[i] {
@@ -60,36 +75,74 @@ func Run(width, height, _, _ int) {
 		return rgba
 	})
 
-	c, err := pulse.NewClient()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	defer c.Close()
-	stream, err := c.NewRecord(pulse.Float32Writer(func(p []float32) (int, error) {
-		start := 0
-		step := spectrogram.FFTSize / 2
-		for len(p)-start >= spectrogram.FFTSize {
-			magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
-			start += step
-			currentRow := make([]color.Color, height)
-			for y := 0; y < height; y++ {
-				freq := float64(y) / float64(height) * 12000
-				bin := int(freq * float64(spectrogram.FFTSize) / 44100)
-				if bin < len(magnitudes) {
-					magnitude := magnitudes[bin]
-					currentRow[y] = spectrogram.MagnitudeToPixel(magnitude)
-				} else {
-					currentRow[y] = color.Black
+
+	var stream *pulse.RecordStream
+	if wsURL == "" {
+		// Initialize PulseAudio client and stream
+		audioCtx, err := pulse.NewClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer audioCtx.Close()
+
+		stream, err = audioCtx.NewRecord(pulse.Float32Writer(processAudio), pulse.RecordLatency(0.1))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer stream.Stop()
+	} else {
+		// Parse the WebSocket URL to determine the correct origin
+		u, err := url.Parse(wsURL)
+		if err != nil {
+			log.Fatal("Invalid WebSocket URL:", err)
+		}
+		origin := u.Scheme + "://" + u.Host
+
+		// Connect to WebSocket server using the provided URL and dynamic origin
+		ws, err := websocket.Dial(wsURL, "", origin)
+		if err != nil {
+			log.Fatal("WebSocket connection failed:", err)
+		}
+		defer func() {
+			if err := ws.Close(); err != nil {
+				log.Println("Error closing WebSocket:", err)
+			}
+		}()
+
+		// Start listening to WebSocket in a separate goroutine
+		go func() {
+			for {
+				var encodedData string
+				err := websocket.Message.Receive(ws, &encodedData)
+				if err != nil {
+					log.Println("Error receiving WebSocket data:", err)
+					continue
+				}
+
+				// Decode Base64 data back to []byte
+				data, err := base64.StdEncoding.DecodeString(encodedData)
+				if err != nil {
+					log.Println("Error decoding Base64 data:", err)
+					continue
+				}
+
+				// Convert received []byte data back to []float32
+				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+				for i := range floatData {
+					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
+						uint32(data[i*4+1])<<8 |
+						uint32(data[i*4+2])<<16 |
+						uint32(data[i*4+3])<<24)
+				}
+
+				// Process the audio data directly
+				_, err = processAudio(floatData)
+				if err != nil {
+					log.Fatal(err)
 				}
 			}
-			spectrogramHistory[historyIndex] = currentRow
-			historyIndex = (historyIndex + 1) % width
+		}()
 
-		}
-		return len(p), nil
-	}), pulse.RecordLatency(0.1))
-	if err != nil {
-		log.Fatal(err.Error())
 	}
 
 	fpsText := canvas.NewText("FPS: 0", color.RGBA{255, 0, 0, 255})
@@ -120,7 +173,30 @@ func Run(width, height, _, _ int) {
 
 	w.Resize(fyne.NewSize(800, 600))
 	stream.Start()
+	defer stream.Stop()
 	w.ShowAndRun()
+}
 
-	stream.Stop()
+func processAudio(p []float32) (int, error) {
+	start := 0
+	step := spectrogram.FFTSize / 2
+	for len(p)-start >= spectrogram.FFTSize {
+		magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
+		start += step
+		currentRow := make([]color.Color, height)
+		for y := 0; y < height; y++ {
+			freq := float64(y) / float64(height) * 12000
+			bin := int(freq * float64(spectrogram.FFTSize) / 44100)
+			if bin < len(magnitudes) {
+				magnitude := magnitudes[bin]
+				currentRow[y] = spectrogram.MagnitudeToPixel(magnitude)
+			} else {
+				currentRow[y] = color.Black
+			}
+		}
+
+		spectrogramHistory[historyIndex] = currentRow
+		historyIndex = (historyIndex + 1) % width
+	}
+	return len(p), nil
 }

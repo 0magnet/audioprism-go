@@ -31,20 +31,20 @@ var (
 	texture                             gl.Texture
 	spectrogramHistory                  [][]byte
 	historyIndex                        int
-	spectrogramWidth, spectrogramHeight int
+	width, height int
 	showFPS                             bool
 )
 
 // Run initializes and starts the Gomobile application
-func Run(width, height, _, _ int, fpsDisplay bool, wsURL string) {
-	spectrogramWidth = width
-	spectrogramHeight = height
-	showFPS = fpsDisplay
+func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
+	width = w
+	height = h
+	showFPS = fpsDisp
 
 	// Initialize the spectrogram history buffer
-	spectrogramHistory = make([][]byte, spectrogramWidth)
+	spectrogramHistory = make([][]byte, width)
 	for i := range spectrogramHistory {
-		spectrogramHistory[i] = make([]byte, spectrogramHeight*4) // RGBA
+		spectrogramHistory[i] = make([]byte, height*4) // RGBA
 	}
 var stream *pulse.RecordStream
 if wsURL == "" {
@@ -152,9 +152,9 @@ func processAudio(p []float32) (int, error) {
 		magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
 		start += step
 
-		newColumn := make([]byte, spectrogramHeight*4)
-		for y := 0; y < spectrogramHeight; y++ {
-			freq := float64(y) / float64(spectrogramHeight) * 12000
+		newColumn := make([]byte, height*4)
+		for y := 0; y < height; y++ {
+			freq := float64(y) / float64(height) * 12000
 			bin := int(freq * float64(spectrogram.FFTSize) / 44100)
 			if bin < len(magnitudes) {
 				magnitude := magnitudes[bin]
@@ -172,9 +172,8 @@ func processAudio(p []float32) (int, error) {
 			}
 		}
 
-		// Shift history and insert the new column
-		copy(spectrogramHistory[0:], spectrogramHistory[1:])
-		spectrogramHistory[spectrogramWidth-1] = newColumn
+		spectrogramHistory[historyIndex] = newColumn
+		historyIndex = (historyIndex + 1) % width
 	}
 	return len(p), nil
 }
@@ -202,7 +201,7 @@ func onStart(glctx gl.Context) {
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	glctx.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, spectrogramWidth, spectrogramHeight, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+	glctx.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 }
 
 func onStop(glctx gl.Context) {
@@ -248,10 +247,10 @@ func onPaint(glctx gl.Context, sz size.Event, showFPS bool) {
 	glctx.VertexAttribPointer(texCoord, 2, gl.FLOAT, false, 0, 0)
 
 	glctx.BindTexture(gl.TEXTURE_2D, texture)
-	for i, column := range spectrogramHistory {
-		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, i, 0, 1, spectrogramHeight, gl.RGBA, gl.UNSIGNED_BYTE, column)
+	for x := 0; x < len(spectrogramHistory); x++ {
+		index := (historyIndex + x) % len(spectrogramHistory)
+		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, x, 0, 1, len(spectrogramHistory[0])/4, gl.RGBA, gl.UNSIGNED_BYTE, spectrogramHistory[index])
 	}
-
 	glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
 	glctx.DisableVertexAttribArray(position)
