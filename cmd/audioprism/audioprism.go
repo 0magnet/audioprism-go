@@ -1,6 +1,6 @@
 // Package main cmd/audioprism/audioprism.go
 //
-//go:generate go run audioprism.go gen -w -p ../../cmd
+//go:generate go run audioprism.go gen -w -p ../../cmd/
 package main
 
 import (
@@ -130,7 +130,7 @@ var genCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("Error parsing template:", err)
 		}
-		dirs, err := script.ListFiles(path).Replace(path, "").Reject(strings.Split(filepath.Base(strings.ReplaceAll(strings.ReplaceAll(fmt.Sprintf("%v", os.Args), "[", ""), "]", "")), " ")[0]).Slice()
+		dirs, err := script.ListFiles(path).Basename().Reject("audioprism").Slice()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -148,6 +148,7 @@ var genCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
+
 				_, err := script.Echo("===>" + path + dir + "/" + dir + ".go<===\n" + buf.String() + "\n" + "const help = `" + help + "`\n").Stdout()
 				if err != nil {
 					log.Fatal(err)

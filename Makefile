@@ -24,10 +24,10 @@ run-w: ## run the websockets server / wasm gui
 	go run ./cmd/audioprism/audioprism.go w -d
 
 gen-wasm: ## Update the included wasm binary and wasm_exec.js script with go generate
-	go generate ./cmd/wasm/commands/root.go
+	cd ./cmd/wasm/commands && go generate
 
 gen-wrap: ## regenerate command wrappers with go generate
-	go generate	./cmd/audioprism/audioprism.go
+	cd ./cmd/audioprism && go generate
 
 gen: gen-wrap gen-wasm ## preform all go generate operations
 
