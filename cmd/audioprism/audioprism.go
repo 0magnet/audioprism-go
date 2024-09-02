@@ -1,4 +1,4 @@
-// cmd/audioprism/audioprism.go
+// Package main cmd/audioprism/audioprism.go
 //
 //go:generate go run cmd/audioprism/audioprism.go gen -w
 package main
@@ -26,9 +26,7 @@ func init() {
 		fyneui.RootCmd,
 		gomobileui.RootCmd,
 		wasm.RootCmd,
-		genCmd,
 	)
-	genCmd.Hidden = true
 	fyneui.RootCmd.Use = "f"
 	fyneui.RootCmd.Long = `
 	┌─┐┬ ┬┌┐┌┌─┐
@@ -53,6 +51,7 @@ func init() {
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 	RootCmd.PersistentFlags().MarkHidden("help") //nolint
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+	wasm.RootCmd.CompletionOptions.DisableDefaultCmd = true
 	RootCmd.SetUsageTemplate(help)
 
 }
@@ -101,12 +100,18 @@ Global Flags:
 
 `
 
+//command wrapper generation
+//any directories in the specified path will have a .go file of the same name written into them with the rendered wrapper template
+//assumes that these dirs contain a 'commands' package / subdir
+
 var (
 	path     string
 	writeOut bool
 )
 
 func init() {
+	RootCmd.AddCommand(genCmd)
+	genCmd.Hidden = true
 	genCmd.Flags().StringVarP(&path, "path", "p", "cmd/", "path to commands")
 	genCmd.Flags().BoolVarP(&writeOut, "write", "w", false, "write files ; false for preview")
 }
@@ -117,7 +122,8 @@ type tplData struct {
 
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "Generate a subcommands from template",
+	Short: "generate subcommand wrappers from template",
+	Long:  "generate subcommand wrappers from template",
 	Run: func(_ *cobra.Command, _ []string) {
 
 		tmpl, err := template.New("main").Parse(command)
@@ -142,7 +148,7 @@ var genCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-				_, err := script.Echo("===>" + path + dir + "/" + dir + ".go<===\n" + buf.String() + "\n" + "const help = `" + help + "`").Stdout()
+				_, err := script.Echo("===>" + path + dir + "/" + dir + ".go<===\n" + buf.String() + "\n" + "const help = `" + help + "`\n").Stdout()
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -169,6 +175,7 @@ func init() {
 	commands.RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help menu")
 	commands.RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 	commands.RootCmd.PersistentFlags().MarkHidden("help") //nolint
+	commands.RootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 func main() {

@@ -15,6 +15,7 @@ func init() {
 	commands.RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help menu")
 	commands.RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 	commands.RootCmd.PersistentFlags().MarkHidden("help") //nolint
+	commands.RootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 func main() {

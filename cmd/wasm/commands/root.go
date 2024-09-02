@@ -1,7 +1,6 @@
 // Package commands cmd/wasm/commands/root.go
 //
-//go:generate bash -c "cp -b /usr/lib/go/misc/wasm/wasm_exec.js wasm_exec.js ; [[ -f 'wasm_exec.js~' ]] && rm wasm_exec.js~"
-//go:generate bash -c "GOOS=js GOARCH=wasm go build -o bundle.wasm ../wasm/b.go"
+//go:generate go run cmd/audioprism/audioprism.go w gen
 package commands
 
 import (
@@ -373,3 +372,51 @@ async function run() {
 </body>
 </html>
 `
+
+var (
+	writePath string
+	wasmSrc   string
+)
+
+func init() {
+	RootCmd.AddCommand(genCmd)
+	genCmd.Hidden = true
+	genCmd.Flags().StringVarP(&writePath, "path", "p", "cmd/wasm/commands/", "path to write files")
+	genCmd.Flags().StringVarP(&wasmSrc, "wpath", "w", "cmd/wasm/wasm/", "path to wasm source")
+	genCmd.Flags().BoolVarP(&tinyGo, "tinygo", "t", false, "use tinygo")
+}
+
+var genCmd = &cobra.Command{
+	Use:   "gen",
+	Short: "update embedded resources",
+	Long:  "update wasm_exec.js & recompile wasm binary bundle.wasm",
+	Run: func(_ *cobra.Command, _ []string) {
+		wasmSourceFiles, err := script.ListFiles(wasmSrc).String()
+		if err != nil {
+			log.Fatal(err)
+		}
+		wasmXecPath := wasmExecLocation
+		if tinyGo {
+			wasmXecPath = tinygowasmExecLocation
+		}
+		fmt.Println("copying " + wasmXecPath + " to " + writePath + "wasm_exec.js")
+		_, err = script.File(wasmXecPath).WriteFile(writePath + "wasm_exec.js")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("compiling wasm binary")
+		if tinyGo {
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w' --no-debug -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	},
+}

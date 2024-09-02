@@ -14,7 +14,22 @@ check: lint test ## Run linters and tests
 build: ## Install dependencies, build binary
 	go build ./cmd/audioprism
 
-wasm: ## Update the included wasm binary and wasm_exec.js script with go generate
+run-f: ## run the fyne gui
+	go run ./cmd/audioprism/audioprism.go f
+
+run-m: ## run the gomobile gui
+	go run ./cmd/audioprism/audioprism.go m
+
+run-w: ## run the websockets server / wasm gui
+	go run ./cmd/audioprism/audioprism.go w -d
+
+gen-wasm: ## Update the included wasm binary and wasm_exec.js script with go generate
+	cd cmd/wasm/commands && go generate
+
+gen-wrap: ## regenerate command wrappers with go generate
+	go run ./cmd/audioprism/audioprism.go gen -w
+
+gen-wasm: ## Update the included wasm binary and wasm_exec.js script with go generate
 	cd cmd/wasm/commands && go generate
 
 lint: ## Run linters
