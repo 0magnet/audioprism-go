@@ -1,4 +1,5 @@
 // cmd/audioprism/audioprism.go
+//
 //go:generate go run cmd/audioprism/audioprism.go gen -w
 package main
 

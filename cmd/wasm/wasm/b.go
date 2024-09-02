@@ -79,14 +79,8 @@ func processFloat32Data(bytes []byte) {
 		floatData[i] = math.Float32frombits(uint32(bytes[i*4]) | uint32(bytes[i*4+1])<<8 | uint32(bytes[i*4+2])<<16 | uint32(bytes[i*4+3])<<24)
 	}
 
-	// Process the float data directly
-	updateSpectrogram(floatData)
-}
-
-func updateSpectrogram(floatData []float32) {
 	magnitudes := sg.ComputeFFT(floatData)
 	newColumn := make([]byte, h*4)
-
 	for y := 0; y < h; y++ {
 		color := sg.MagnitudeToPixel(magnitudes[y])
 		r, g, b, a := color.RGBA()
