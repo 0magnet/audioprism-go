@@ -1,6 +1,6 @@
 // Package commands cmd/wasm/commands/root.go
 //
-//go:generate go run cmd/audioprism/audioprism.go w gen
+//go:generate go run ../../audioprism/audioprism.go w gen -p "" -w ../wasm/
 package commands
 
 import (

@@ -1,6 +1,6 @@
 // Package main cmd/audioprism/audioprism.go
 //
-//go:generate go run cmd/audioprism/audioprism.go gen -w
+//go:generate go run audioprism.go gen -w -p ../../cmd
 package main
 
 import (
