@@ -19,20 +19,20 @@ import (
 	"golang.org/x/mobile/gl"
 	"golang.org/x/net/websocket"
 
-	"github.com/0magnet/audioprism-go/pkg/spectrogram"
+	sg "github.com/0magnet/audioprism-go/pkg/spectrogram"
 )
 
 var (
-	images             *glutil.Images
-	fps                *debug.FPS
-	program            gl.Program
-	position           gl.Attrib
-	texCoord           gl.Attrib
-	texture            gl.Texture
-	spectrogramHistory [][]byte
-	historyIndex       int
-	width, height      int
-	showFPS            bool
+	images        *glutil.Images
+	fps           *debug.FPS
+	program       gl.Program
+	position      gl.Attrib
+	texCoord      gl.Attrib
+	texture       gl.Texture
+	sgHist        [][]byte
+	sgHistIndex   int
+	width, height int
+	showFPS       bool
 )
 
 // Run initializes and starts the Gomobile application
@@ -42,9 +42,9 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 	showFPS = fpsDisp
 
 	// Initialize the spectrogram history buffer
-	spectrogramHistory = make([][]byte, width)
-	for i := range spectrogramHistory {
-		spectrogramHistory[i] = make([]byte, height*4) // RGBA
+	sgHist = make([][]byte, width)
+	for i := range sgHist {
+		sgHist[i] = make([]byte, height*4) // RGBA
 	}
 	var stream *pulse.RecordStream
 	if wsURL == "" {
@@ -147,18 +147,17 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 
 func processAudio(p []float32) (int, error) {
 	start := 0
-	step := spectrogram.FFTSize / 2
-	for len(p)-start >= spectrogram.FFTSize {
-		magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
+	step := sg.FFTSize / 2
+	for len(p)-start >= sg.FFTSize {
+		magnitudes := sg.ComputeFFT(p[start : start+sg.FFTSize])
 		start += step
 
 		newColumn := make([]byte, height*4)
 		for y := 0; y < height; y++ {
 			freq := float64(y) / float64(height) * 12000
-			bin := int(freq * float64(spectrogram.FFTSize) / 44100)
+			bin := int(freq * float64(sg.FFTSize) / 44100)
 			if bin < len(magnitudes) {
-				magnitude := magnitudes[bin]
-				color := spectrogram.MagnitudeToPixel(magnitude)
+				color := sg.MagnitudeToPixel(magnitudes[bin])
 				r, g, b, a := color.RGBA()
 				newColumn[y*4+0] = byte(r >> 8)
 				newColumn[y*4+1] = byte(g >> 8)
@@ -172,8 +171,8 @@ func processAudio(p []float32) (int, error) {
 			}
 		}
 
-		spectrogramHistory[historyIndex] = newColumn
-		historyIndex = (historyIndex + 1) % width
+		sgHist[sgHistIndex] = newColumn
+		sgHistIndex = (sgHistIndex + 1) % width
 	}
 	return len(p), nil
 }
@@ -247,9 +246,9 @@ func onPaint(glctx gl.Context, sz size.Event, showFPS bool) {
 	glctx.VertexAttribPointer(texCoord, 2, gl.FLOAT, false, 0, 0)
 
 	glctx.BindTexture(gl.TEXTURE_2D, texture)
-	for x := 0; x < len(spectrogramHistory); x++ {
-		index := (historyIndex + x) % len(spectrogramHistory)
-		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, x, 0, 1, len(spectrogramHistory[0])/4, gl.RGBA, gl.UNSIGNED_BYTE, spectrogramHistory[index])
+	for x := 0; x < len(sgHist); x++ {
+		index := (sgHistIndex + x) % len(sgHist)
+		glctx.TexSubImage2D(gl.TEXTURE_2D, 0, x, 0, 1, len(sgHist[0])/4, gl.RGBA, gl.UNSIGNED_BYTE, sgHist[index])
 	}
 	glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 

@@ -16,8 +16,8 @@ import (
 var (
 	w, h                                       int
 	gl, t, wskt, sP, uSampler, vPos, vTexCoord js.Value //nolint:unused
-	sHist                                      [][]byte
-	sHistIndex                                 int
+	sgHist                                     [][]byte
+	sgHistIndex                                int
 	rndrFr                                     js.Func
 	glTypes                                    wgl.GLTypes
 	historySize                                = 600
@@ -56,13 +56,22 @@ func initWS() {
 		}
 
 		if data.Type() == js.TypeString {
-			base64Data := data.String()
-			bytes, err := base64.StdEncoding.DecodeString(base64Data)
+			b, err := base64.StdEncoding.DecodeString(data.String())
 			if err != nil {
 				log.Println("Failed to decode base64 data:", err)
 				return nil
 			}
-			processFloat32Data(bytes)
+			floatData := make([]float32, len(b)/4)
+			for i := range floatData {
+				floatData[i] = math.Float32frombits(uint32(b[i*4]) |
+					uint32(b[i*4+1])<<8 |
+					uint32(b[i*4+2])<<16 |
+					uint32(b[i*4+3])<<24)
+			}
+			_, err = processAudio(floatData)
+			if err != nil {
+				log.Fatal(err)
+			}
 		} else {
 			log.Printf("Received data of unexpected type: %s", data.Type().String())
 		}
@@ -73,25 +82,27 @@ func initWS() {
 	wskt = ws
 }
 
-func processFloat32Data(bytes []byte) {
-	floatData := make([]float32, len(bytes)/4)
-	for i := range floatData {
-		floatData[i] = math.Float32frombits(uint32(bytes[i*4]) | uint32(bytes[i*4+1])<<8 | uint32(bytes[i*4+2])<<16 | uint32(bytes[i*4+3])<<24)
-	}
+func processAudio(p []float32) (int, error) { //nolint
+	start := 0
+	step := sg.FFTSize / 2
+	for len(p)-start >= sg.FFTSize {
+		magnitudes := sg.ComputeFFT(p[start : start+sg.FFTSize])
+		start += step
+		newColumn := make([]byte, h*4)
+		for y := 0; y < h; y++ {
+			freq := float64(y) / float64(h) * 12000
+			color := sg.MagnitudeToPixel(magnitudes[int(freq*float64(sg.FFTSize)/44100)])
+			r, g, b, a := color.RGBA()
+			newColumn[y*4+0] = byte(r >> 8)
+			newColumn[y*4+1] = byte(g >> 8)
+			newColumn[y*4+2] = byte(b >> 8)
+			newColumn[y*4+3] = byte(a >> 8)
+		}
 
-	magnitudes := sg.ComputeFFT(floatData)
-	newColumn := make([]byte, h*4)
-	for y := 0; y < h; y++ {
-		color := sg.MagnitudeToPixel(magnitudes[y])
-		r, g, b, a := color.RGBA()
-		newColumn[y*4+0] = byte(r >> 8)
-		newColumn[y*4+1] = byte(g >> 8)
-		newColumn[y*4+2] = byte(b >> 8)
-		newColumn[y*4+3] = byte(a >> 8)
+		sgHist[sgHistIndex] = newColumn
+		sgHistIndex = (sgHistIndex + 1) % historySize
 	}
-
-	sHist[sHistIndex] = newColumn
-	sHistIndex = (sHistIndex + 1) % historySize
+	return len(p), nil
 }
 
 func initGL() {
@@ -172,11 +183,11 @@ func spectexture() {
 }
 
 func initHist() {
-	sHist = make([][]byte, historySize)
-	for i := range sHist {
-		sHist[i] = make([]byte, h*4)
+	sgHist = make([][]byte, historySize)
+	for i := range sgHist {
+		sgHist[i] = make([]byte, h*4)
 	}
-	sHistIndex = 0
+	sgHistIndex = 0
 }
 
 func renderLoop() {
@@ -199,17 +210,12 @@ func renderSpect() {
 	gl.Call("bindTexture", glTypes.Texture2D, t)
 	checkGLError("Error binding texture")
 
-	for i, column := range sHist {
-		if len(column) != h*4 {
-			log.Printf("Invalid column size: %d", len(column))
-			continue
-		}
-
-		arrayBuffer := js.Global().Get("ArrayBuffer").New(len(column))
+	for x := 0; x < len(sgHist); x++ {
+		index := (sgHistIndex + x) % len(sgHist)
+		arrayBuffer := js.Global().Get("ArrayBuffer").New(len(sgHist[index]))
 		uint8Array := js.Global().Get("Uint8Array").New(arrayBuffer)
-		js.CopyBytesToJS(uint8Array, column)
-
-		gl.Call("texSubImage2D", glTypes.Texture2D, 0, i, 0, 1, h, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
+		js.CopyBytesToJS(uint8Array, sgHist[index])
+		gl.Call("texSubImage2D", glTypes.Texture2D, 0, x, 0, 1, len(sgHist[index])/4, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
 		checkGLError("Error updating texture data")
 	}
 
