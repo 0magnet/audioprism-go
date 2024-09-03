@@ -1,19 +1,4 @@
-/*
- * Copyright (c) 2011 Matt Jibson <matt.jibson@gmail.com>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
+// Package fft provides forward and inverse fast Fourier transform functions.
 package fft
 
 import (
@@ -52,11 +37,9 @@ func getRadix2Factors(input_len int) []complex128 {
 		for i, p := 8, 4; i <= input_len; i, p = i<<1, i {
 			if radix2Factors[i] == nil {
 				radix2Factors[i] = make([]complex128, i)
-
 				for n, j := 0, 0; n < i; n, j = n+2, j+1 {
 					radix2Factors[i][n] = radix2Factors[p][j]
 				}
-
 				for n := 1; n < i; n += 2 {
 					sin, cos := math.Sincos(-2 * math.Pi / float64(i) * float64(n))
 					radix2Factors[i][n] = complex(cos, sin)
@@ -64,7 +47,6 @@ func getRadix2Factors(input_len int) []complex128 {
 			}
 		}
 	}
-
 	return radix2Factors[input_len]
 }
 
@@ -80,25 +62,19 @@ type fft_work struct {
 func radix2FFT(x []complex128) []complex128 {
 	lx := len(x)
 	factors := getRadix2Factors(lx)
-
 	t := make([]complex128, lx) // temp
 	r := reorderData(x)
-
 	var blocks, stage, s_2 int
-
 	jobs := make(chan *fft_work, lx)
 	wg := sync.WaitGroup{}
-
 	num_workers := worker_pool_size
 	if (num_workers) == 0 {
 		num_workers = runtime.GOMAXPROCS(0)
 	}
-
 	idx_diff := lx / num_workers
 	if idx_diff < 2 {
 		idx_diff = 2
 	}
-
 	worker := func() {
 		for work := range jobs {
 			for nb := work.start; nb < work.end; nb += stage {
@@ -122,48 +98,83 @@ func radix2FFT(x []complex128) []complex128 {
 			wg.Done()
 		}
 	}
-
+	if num_workers >= 0 {
 	for i := 0; i < num_workers; i++ {
 		go worker()
 	}
 	defer close(jobs)
-
+	} //else {
+		//this does not work but the function will not see this case
+		//worker()
+	//}
 	for stage = 2; stage <= lx; stage <<= 1 {
 		blocks = lx / stage
 		s_2 = stage / 2
-
 		for start, end := 0, stage; ; {
 			if end-start >= idx_diff || end == lx {
 				wg.Add(1)
 				jobs <- &fft_work{start, end}
-
 				if end == lx {
 					break
 				}
-
 				start = end
 			}
-
 			end += stage
 		}
 		wg.Wait()
 		r, t = t, r
 	}
-
 	return r
 }
+
+// radix2FFTSingleThread returns the FFT calculated using the radix-2 DIT Cooley-Tukey algorithm in single threaded operation.
+func radix2FFTSingleThread(x []complex128) []complex128 {
+    lx := len(x)
+    factors := getRadix2Factors(lx)
+    t := make([]complex128, lx) // temp
+    r := reorderData(x)
+    var blocks, stage, s_2 int
+
+    // Sequential processing: remove concurrency, process the FFT stages sequentially.
+    for stage = 2; stage <= lx; stage <<= 1 {
+        blocks = lx / stage
+        s_2 = stage / 2
+
+        // Perform the FFT for each block
+        for nb := 0; nb < lx; nb += stage {
+            if stage != 2 {
+                for j := 0; j < s_2; j++ {
+                    idx := j + nb
+                    idx2 := idx + s_2
+                    ridx := r[idx]
+                    w_n := r[idx2] * factors[blocks*j]
+                    t[idx] = ridx + w_n
+                    t[idx2] = ridx - w_n
+                }
+            } else {
+                n1 := nb + 1
+                rn := r[nb]
+                rn1 := r[n1]
+                t[nb] = rn + rn1
+                t[n1] = rn - rn1
+            }
+        }
+        // Swap t and r for the next stage
+        r, t = t, r
+    }
+    return r
+}
+
 
 // reorderData returns a copy of x reordered for the DFT.
 func reorderData(x []complex128) []complex128 {
 	lx := uint(len(x))
 	r := make([]complex128, lx)
 	s := log2(lx)
-
 	var n uint
 	for ; n < lx; n++ {
 		r[reverseBits(n, s)] = x[n]
 	}
-
 	return r
 }
 
@@ -171,11 +182,9 @@ func reorderData(x []complex128) []complex128 {
 // from: http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
 func log2(v uint) uint {
 	var r uint
-
 	for v >>= 1; v != 0; v >>= 1 {
 		r++
 	}
-
 	return r
 }
 
@@ -188,12 +197,10 @@ func reverseBits(v, s uint) uint {
 	// we only need the first bit of v instead of a full copy.
 	r = v & 1
 	s--
-
 	for v >>= 1; v != 0; v >>= 1 {
 		r <<= 1
 		r |= v & 1
 		s--
 	}
-
 	return r << s
 }

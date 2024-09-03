@@ -1,14 +1,14 @@
 module github.com/0magnet/audioprism-go
 
-go 1.22.4
+go 1.23.0
 
 require (
 	fyne.io/fyne/v2 v2.5.1
+	github.com/0magnet/go-dsp v0.0.0-20240903231535-ddbeeba83b5c
 	github.com/bitfield/script v0.22.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/jfreymuth/pulse v0.1.1
-	github.com/mjibson/go-dsp v0.0.0-20180508042940-11479a337f12
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/mobile v0.0.0-20240806205939-81131f6468ab
 	golang.org/x/net v0.28.0

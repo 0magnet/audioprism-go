@@ -7,8 +7,8 @@ import (
 	"math/cmplx"
 	"sync"
 
-	"github.com/mjibson/go-dsp/fft"
-	"github.com/mjibson/go-dsp/window"
+	"github.com/0magnet/go-dsp/fft"
+	"github.com/0magnet/go-dsp/window"
 )
 
 const (
@@ -30,6 +30,10 @@ var (
 	AudioBuffer     []float32
 	AudioBufferLock sync.Mutex
 )
+
+func SetSingleThreaded() {
+	fft.SetWorkerPoolSize(-1)
+}
 
 // Normalize normalizes the value between the given range.
 func Normalize(value, min, max float64) float64 {

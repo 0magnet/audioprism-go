@@ -75,6 +75,7 @@ type commandTpl struct {
 	WasmPath string
 	Height   string
 	Width    string
+	LDFlags    string
 }
 
 // RootCmd is the root cli command
@@ -129,7 +130,7 @@ var RootCmd = &cobra.Command{
 			}
 
 			if devMode {
-				execTpl := `bash -c 'GOOS=js GOARCH=wasm {{.Tiny}}go build -trimpath --ldflags "{{.Height}}{{.Width}}-s -w" {{.Target}}  -o /dev/stdout {{.WasmPath}}'`
+				execTpl := `bash -c 'GOOS=js GOARCH=wasm {{.Tiny}}go build --ldflags "{{.Height}}{{.Width}}{{.LDFlags}}" {{.Target}}  -o /dev/stdout {{.WasmPath}}'`
 				tmpl, err := template.New("exec").Parse(execTpl)
 				if err != nil {
 					log.Fatalf("Error parsing template: %v", err)
@@ -142,11 +143,13 @@ var RootCmd = &cobra.Command{
 				if width != 512 {
 					data.Width = " -X='main.width=" + strconv.Itoa(width) + "' "
 				}
+				data.LDFlags=" -s -w "
 
 				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript) //nolint
 				if tinyGo {
+					data.LDFlags=" -X='main.tinygo=true' "
 					data.Tiny = "tiny"
-					data.Target = "-target wasm"
+					data.Target = "-target wasm "
 					htmlPageTemplateData.Title = "audioprism-go WASM tinygo dev mode"
 				} else {
 					htmlPageTemplateData.Title = "audioprism-go WASM dev mode"
@@ -436,14 +439,14 @@ var genCmd = &cobra.Command{
 		}
 		fmt.Println("compiling wasm binary")
 		if tinyGo {
-			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
-			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			fmt.Println(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
-			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm go build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm go build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
 			if err != nil {
 				log.Fatal(err)
 			}

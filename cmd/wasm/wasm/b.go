@@ -9,6 +9,7 @@ import (
 	"math"
 	"strconv"
 	"syscall/js"
+	"time"
 
 	sg "github.com/0magnet/audioprism-go/pkg/spectrogram"
 	"github.com/0magnet/audioprism-go/pkg/wgl"
@@ -16,6 +17,7 @@ import (
 
 var (
 	width, height                                             string
+	tinygo                                             string
 	w                                                         = 512
 	h                                                         = 512
 	gl, t, wskt, sP, uSampler, vPos, vTexCoord, vBuff, tCBuff js.Value //nolint:unused
@@ -24,13 +26,16 @@ var (
 	rndrFr                                                    js.Func
 	glTypes                                                   wgl.GLTypes
 	historySize                                               int
-	startTime                                                 = js.Global().Get("performance").Call("now").Float()
+	startTime                                                 = time.Now()
 	frameCount                                                int
 	fps                                                       float64
 	fpsDisplay                                                js.Value
 )
 
 func main() {
+	if tinygo != "" {
+		sg.SetSingleThreaded()
+	}
 	if width != "" {
 		num, err := strconv.Atoi(width)
 		if err != nil {
@@ -282,6 +287,7 @@ func initBuffers() {
 	uint8Array = js.Global().Get("Uint8Array").New(arrayBuffer)
 }
 
+var fullTextureData = make([]byte, w*h*4)
 func renderSpect() {
 	gl.Call("clearColor", 0, 0, 0, 1)
 	gl.Call("clear", glTypes.ColorBufferBit)
@@ -291,7 +297,6 @@ func renderSpect() {
 
 	//	/*
 	//reduce texSubImage2D usage
-	fullTextureData := make([]byte, w*h*4)
 	for x := 0; x < len(sgHist); x++ {
 		index := (sgHistIndex + x) % len(sgHist)
 		copy(fullTextureData[x*h*4:(x+1)*h*4], sgHist[index])
@@ -322,13 +327,13 @@ func renderSpect() {
 
 func updateFPSDisplay() {
 	frameCount++
-	currentTime := js.Global().Get("performance").Call("now").Float()
-	elapsedTime := currentTime - startTime
+	currentTime := time.Now()
+	elapsedTime := time.Since(startTime).Seconds()
 	if elapsedTime > 2000 {
 		fps = float64(frameCount) / (elapsedTime / 1000.0)
 		startTime = currentTime
+		fpsDisplay.Set("innerHTML", "FPS: "+strconv.FormatFloat(fps, 'f', 2, 64)+" Frames: "+strconv.Itoa(frameCount))
 		frameCount = 0
-		fpsDisplay.Set("innerHTML", "FPS: "+strconv.FormatFloat(fps, 'f', 2, 64))
 	}
 }
 
