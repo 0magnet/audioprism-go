@@ -1,5 +1,6 @@
+
 // Package main cmd/gomobile/gomobile.go
-// CREATED BY GO GENERATE DO NOT EDIT!
+//CREATED BY GO GENERATE DO NOT EDIT!
 package main
 
 import (

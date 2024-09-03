@@ -15,7 +15,7 @@ var (
 
 func init() {
 	RootCmd.Flags().IntVarP(&w, "width", "x", 512, "initial window width")
-	RootCmd.Flags().IntVarP(&h, "height", "y", 256, "initial window height")
+	RootCmd.Flags().IntVarP(&h, "height", "y", 512, "initial window height")
 	RootCmd.Flags().IntVarP(&u, "up", "u", 60, "fps rate - 0 unlimits")
 	RootCmd.Flags().IntVarP(&b, "buf", "b", 32768, "size of audio buffer")
 	RootCmd.Flags().BoolVarP(&s, "fps", "s", false, "show fps")

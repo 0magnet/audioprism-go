@@ -41,20 +41,17 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 	height = h
 	showFPS = fpsDisp
 
-	// Initialize the spectrogram history buffer
 	sgHist = make([][]byte, width)
 	for i := range sgHist {
 		sgHist[i] = make([]byte, height*4) // RGBA
 	}
 	var stream *pulse.RecordStream
 	if wsURL == "" {
-		// Initialize PulseAudio client and stream
 		audioCtx, err := pulse.NewClient()
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer audioCtx.Close()
-
 		stream, err = audioCtx.NewRecord(pulse.Float32Writer(processAudio), pulse.RecordLatency(0.1))
 		if err != nil {
 			log.Fatal(err)
@@ -62,14 +59,11 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 		stream.Start()
 		defer stream.Stop()
 	} else {
-		// Parse the WebSocket URL to determine the correct origin
 		u, err := url.Parse(wsURL)
 		if err != nil {
 			log.Fatal("Invalid WebSocket URL:", err)
 		}
 		origin := u.Scheme + "://" + u.Host
-
-		// Connect to WebSocket server using the provided URL and dynamic origin
 		ws, err := websocket.Dial(wsURL, "", origin)
 		if err != nil {
 			log.Fatal("WebSocket connection failed:", err)
@@ -79,8 +73,6 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 				log.Println("Error closing WebSocket:", err)
 			}
 		}()
-
-		// Start listening to WebSocket in a separate goroutine
 		go func() {
 			for {
 				var encodedData string
@@ -89,15 +81,11 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 					log.Println("Error receiving WebSocket data:", err)
 					continue
 				}
-
-				// Decode Base64 data back to []byte
 				data, err := base64.StdEncoding.DecodeString(encodedData)
 				if err != nil {
 					log.Println("Error decoding Base64 data:", err)
 					continue
 				}
-
-				// Convert received []byte data back to []float32
 				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
 				for i := range floatData {
 					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
@@ -105,17 +93,13 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 						uint32(data[i*4+2])<<16 |
 						uint32(data[i*4+3])<<24)
 				}
-
-				// Process the audio data directly
 				_, err = processAudio(floatData)
 				if err != nil {
 					log.Fatal(err)
 				}
 			}
 		}()
-
 	}
-
 	app.Main(func(a app.App) {
 		var glctx gl.Context
 		var sz size.Event
@@ -151,7 +135,6 @@ func processAudio(p []float32) (int, error) {
 	for len(p)-start >= sg.FFTSize {
 		magnitudes := sg.ComputeFFT(p[start : start+sg.FFTSize])
 		start += step
-
 		newColumn := make([]byte, height*4)
 		for y := 0; y < height; y++ {
 			freq := float64(y) / float64(height) * 12000
@@ -170,7 +153,6 @@ func processAudio(p []float32) (int, error) {
 				newColumn[y*4+3] = 255
 			}
 		}
-
 		sgHist[sgHistIndex] = newColumn
 		sgHistIndex = (sgHistIndex + 1) % width
 	}
@@ -192,8 +174,6 @@ func onStart(glctx gl.Context) {
 	if showFPS {
 		fps = debug.NewFPS(images)
 	}
-
-	// Initialize texture
 	texture = glctx.CreateTexture()
 	glctx.BindTexture(gl.TEXTURE_2D, texture)
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)

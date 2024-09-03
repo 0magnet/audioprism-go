@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"log"
 	"math"
+	"strconv"
 	"syscall/js"
 
 	sg "github.com/0magnet/audioprism-go/pkg/spectrogram"
@@ -14,21 +15,47 @@ import (
 )
 
 var (
-	w, h                                       int
-	gl, t, wskt, sP, uSampler, vPos, vTexCoord js.Value //nolint:unused
-	sgHist                                     [][]byte
-	sgHistIndex                                int
-	rndrFr                                     js.Func
-	glTypes                                    wgl.GLTypes
-	historySize                                = 600
+	width, height                                             string
+	w                                                         = 512
+	h                                                         = 512
+	gl, t, wskt, sP, uSampler, vPos, vTexCoord, vBuff, tCBuff js.Value //nolint:unused
+	sgHist                                                    [][]byte
+	sgHistIndex                                               int
+	rndrFr                                                    js.Func
+	glTypes                                                   wgl.GLTypes
+	historySize                                               int
+	startTime                                                 = js.Global().Get("performance").Call("now").Float()
+	frameCount                                                int
+	fps                                                       float64
+	fpsDisplay                                                js.Value
 )
 
 func main() {
+	if width != "" {
+		num, err := strconv.Atoi(width)
+		if err != nil {
+			log.Println("error parsing width: ", err)
+		} else {
+			w = num
+		}
+	}
+	if height != "" {
+		num, err := strconv.Atoi(height)
+		if err != nil {
+			log.Println("error parsing height: ", err)
+		} else {
+			h = num
+		}
+	}
+	historySize = w
+
 	initWS()
 	initGL()
 	initShaders()
 	spectexture()
 	initHist()
+	initBuffers()
+	createFPSDisplay()
 	renderLoop()
 	select {}
 }
@@ -114,8 +141,6 @@ func initGL() {
 		return
 	}
 
-	w = 600
-	h = 512
 	c.Set("width", w)
 	c.Set("height", h)
 	gl = c.Call("getContext", "webgl")
@@ -190,6 +215,18 @@ func initHist() {
 	sgHistIndex = 0
 }
 
+func createFPSDisplay() {
+	doc := js.Global().Get("document")
+	fpsDisplay = doc.Call("createElement", "div")
+	fpsDisplay.Set("id", "fpsDisplay")
+	fpsDisplay.Get("style").Set("position", "absolute")
+	fpsDisplay.Get("style").Set("bottom", "10px")
+	fpsDisplay.Get("style").Set("left", "10px")
+	fpsDisplay.Get("style").Set("color", "white")
+	fpsDisplay.Set("innerHTML", "FPS: 0")
+	doc.Get("body").Call("appendChild", fpsDisplay)
+}
+
 func renderLoop() {
 	log.Println("Starting render loop")
 
@@ -202,26 +239,7 @@ func renderLoop() {
 	js.Global().Call("requestAnimationFrame", rndrFr)
 }
 
-func renderSpect() {
-	gl.Call("clearColor", 0, 0, 0, 1)
-	gl.Call("clear", glTypes.ColorBufferBit)
-	checkGLError("Error clearing canvas")
-
-	gl.Call("bindTexture", glTypes.Texture2D, t)
-	checkGLError("Error binding texture")
-
-	for x := 0; x < len(sgHist); x++ {
-		index := (sgHistIndex + x) % len(sgHist)
-		arrayBuffer := js.Global().Get("ArrayBuffer").New(len(sgHist[index]))
-		uint8Array := js.Global().Get("Uint8Array").New(arrayBuffer)
-		js.CopyBytesToJS(uint8Array, sgHist[index])
-		gl.Call("texSubImage2D", glTypes.Texture2D, 0, x, 0, 1, len(sgHist[index])/4, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
-		checkGLError("Error updating texture data")
-	}
-
-	gl.Call("uniform1i", uSampler, 0)
-	checkGLError("Error setting uniform sampler")
-
+func setupVertexAttribs() {
 	qVData := []float32{
 		-1, -1, 0,
 		1, -1, 0,
@@ -234,25 +252,84 @@ func renderSpect() {
 		0, 1,
 		1, 1,
 	}
-
-	vBuff := gl.Call("createBuffer")
+	if vBuff.IsUndefined() {
+		vBuff = gl.Call("createBuffer")
+		gl.Call("bindBuffer", glTypes.ArrayBuffer, vBuff)
+		gl.Call("bufferData", glTypes.ArrayBuffer, wgl.SliceToTypedArray(qVData), glTypes.StaticDraw)
+		checkGLError("Error creating or binding vertex buffer")
+	}
+	if tCBuff.IsUndefined() {
+		tCBuff = gl.Call("createBuffer")
+		gl.Call("bindBuffer", glTypes.ArrayBuffer, tCBuff)
+		gl.Call("bufferData", glTypes.ArrayBuffer, wgl.SliceToTypedArray(qTCData), glTypes.StaticDraw)
+		checkGLError("Error creating or binding texture coordinate buffer")
+	}
 	gl.Call("bindBuffer", glTypes.ArrayBuffer, vBuff)
-	gl.Call("bufferData", glTypes.ArrayBuffer, wgl.SliceToTypedArray(qVData), glTypes.StaticDraw)
-	checkGLError("Error creating or binding vertex buffer")
 	gl.Call("enableVertexAttribArray", vPos)
 	gl.Call("vertexAttribPointer", vPos, 3, glTypes.Float, false, 0, 0)
 	checkGLError("Error setting vertex attribute pointer")
 
-	tCBuff := gl.Call("createBuffer")
 	gl.Call("bindBuffer", glTypes.ArrayBuffer, tCBuff)
-	gl.Call("bufferData", glTypes.ArrayBuffer, wgl.SliceToTypedArray(qTCData), glTypes.StaticDraw)
-	checkGLError("Error creating or binding texture coordinate buffer")
 	gl.Call("enableVertexAttribArray", vTexCoord)
 	gl.Call("vertexAttribPointer", vTexCoord, 2, glTypes.Float, false, 0, 0)
 	checkGLError("Error setting texture coordinate attribute pointer")
+}
 
+var uint8Array js.Value
+
+func initBuffers() {
+	arrayBuffer := js.Global().Get("ArrayBuffer").New(w * h * 4)
+	uint8Array = js.Global().Get("Uint8Array").New(arrayBuffer)
+}
+
+func renderSpect() {
+	gl.Call("clearColor", 0, 0, 0, 1)
+	gl.Call("clear", glTypes.ColorBufferBit)
+	checkGLError("Error clearing canvas")
+	gl.Call("bindTexture", glTypes.Texture2D, t)
+	checkGLError("Error binding texture")
+
+	//	/*
+	//reduce texSubImage2D usage
+	fullTextureData := make([]byte, w*h*4)
+	for x := 0; x < len(sgHist); x++ {
+		index := (sgHistIndex + x) % len(sgHist)
+		copy(fullTextureData[x*h*4:(x+1)*h*4], sgHist[index])
+	}
+	js.CopyBytesToJS(uint8Array, fullTextureData)
+	gl.Call("texSubImage2D", glTypes.Texture2D, 0, 0, 0, w, h, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
+	checkGLError("Error updating texture data")
+	//	*/
+	/*
+
+		//original method - slow
+			for x := 0; x < len(sgHist); x++ {
+				index := (sgHistIndex + x) % len(sgHist)
+				arrayBuffer := js.Global().Get("ArrayBuffer").New(len(sgHist[index]))
+				uint8Array := js.Global().Get("Uint8Array").New(arrayBuffer)
+				js.CopyBytesToJS(uint8Array, sgHist[index])
+				gl.Call("texSubImage2D", glTypes.Texture2D, 0, x, 0, 1, len(sgHist[index])/4, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
+				checkGLError("Error updating texture data")
+			}
+	*/
+	gl.Call("uniform1i", uSampler, 0)
+	checkGLError("Error setting uniform sampler")
+	setupVertexAttribs()
 	gl.Call("drawArrays", glTypes.TriangleStrip, 0, 4)
 	checkGLError("Error drawing arrays")
+	updateFPSDisplay()
+}
+
+func updateFPSDisplay() {
+	frameCount++
+	currentTime := js.Global().Get("performance").Call("now").Float()
+	elapsedTime := currentTime - startTime
+	if elapsedTime > 2000 {
+		fps = float64(frameCount) / (elapsedTime / 1000.0)
+		startTime = currentTime
+		frameCount = 0
+		fpsDisplay.Set("innerHTML", "FPS: "+strconv.FormatFloat(fps, 'f', 2, 64))
+	}
 }
 
 func checkGLError(stage string) {
@@ -263,13 +340,16 @@ func checkGLError(stage string) {
 }
 
 const vShadSrc = `
-attribute vec3 position;
+attribute vec4 position;
 attribute vec2 texCoord;
 varying vec2 vTexCoord;
-void main(void) {
-	gl_Position = vec4(position, 1.0);
-	vTexCoord = texCoord;
-}`
+
+void main() {
+    gl_Position = position;
+	vTexCoord = vec2(texCoord.y, texCoord.x);
+}
+
+`
 
 const fShadSrc = `
 precision mediump float;

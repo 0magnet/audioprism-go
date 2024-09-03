@@ -12,11 +12,11 @@ import (
 	"log"
 	"math"
 	"net/http"
-	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 
 	"github.com/bitfield/script"
@@ -27,9 +27,10 @@ import (
 )
 
 var (
-	webPort int
-	devMode bool
-	tinyGo  bool
+	webPort       int
+	devMode       bool
+	tinyGo        bool
+	width, height int
 
 	//go:embed wasm_exec.js
 	wasmExecJs []byte
@@ -48,11 +49,7 @@ var (
 )
 
 func init() {
-	defaultport, err := strconv.Atoi(os.Getenv("WEBPORT"))
-	if err != nil {
-		defaultport = 8080
-	}
-	RootCmd.Flags().IntVarP(&webPort, "port", "p", defaultport, "port to serve on - env WEBPORT="+os.Getenv("WEBPORT"))
+	RootCmd.Flags().IntVarP(&webPort, "port", "p", 8080, "port to serve on")
 	_, err = script.Exec(`bash --help`).Bytes()
 	if err == nil {
 		_, err = script.Exec(`go help`).Bytes()
@@ -65,9 +62,19 @@ func init() {
 		}
 		if err == nil || err1 == nil {
 			RootCmd.Flags().StringVarP(&wasmPath, "wpath", "w", "cmd/wasm/wasm/b.go", "path to wasm source in dev mode")
+			RootCmd.Flags().IntVarP(&width, "width", "x", 512, "width of spectrogram display - set on wasm compilation")
+			RootCmd.Flags().IntVarP(&height, "height", "y", 512, "height of spectrogram display - set on wasm compilation")
 		}
 	}
 
+}
+
+type commandTpl struct {
+	Tiny     string
+	Target   string
+	WasmPath string
+	Height   string
+	Width    string
 }
 
 // RootCmd is the root cli command
@@ -122,14 +129,36 @@ var RootCmd = &cobra.Command{
 			}
 
 			if devMode {
+				execTpl := `bash -c 'GOOS=js GOARCH=wasm {{.Tiny}}go build -trimpath --ldflags "{{.Height}}{{.Width}}-s -w" {{.Target}} -o /dev/stdout {{.WasmPath}}'`
+				tmpl, err := template.New("exec").Parse(execTpl)
+				if err != nil {
+					log.Fatalf("Error parsing template: %v", err)
+				}
+				data := commandTpl{}
+				data.WasmPath = wasmPath
+				if height != 512 {
+					data.Height = " -X='main.height=" + strconv.Itoa(height) + "' "
+				}
+				if width != 512 {
+					data.Width = " -X='main.width=" + strconv.Itoa(width) + "' "
+				}
+
 				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript) //nolint
 				if tinyGo {
+					data.Tiny = "tiny"
+					data.Target = "-target wasm"
 					htmlPageTemplateData.Title = "audioprism-go WASM tinygo dev mode"
-					wasmData, err = script.Exec(`bash -c 'GOOS=js GOARCH=wasm tinygo build -target wasm -o /dev/stdout ` + wasmPath + `'`).Bytes()
 				} else {
 					htmlPageTemplateData.Title = "audioprism-go WASM dev mode"
-					wasmData, err = script.Exec(`bash -c 'GOOS=js GOARCH=wasm go build -o /dev/stdout ` + wasmPath + `'`).Bytes()
 				}
+				var command bytes.Buffer
+				err = tmpl.Execute(&command, data)
+				if err != nil {
+					log.Fatalf("Error executing template: %v", err)
+				}
+				fmt.Println(command.String())
+				wasmData, err = script.Exec(command.String()).Bytes()
+
 				if err != nil {
 					msg := fmt.Sprintf("Could not compile or read wasm file:\n%s\n%v\n", string(wasmData), err)
 					fmt.Println(msg)
@@ -390,6 +419,7 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "update embedded resources",
 	Long:  "update wasm_exec.js & recompile wasm binary bundle.wasm",
+
 	Run: func(_ *cobra.Command, _ []string) {
 		wasmSourceFiles, err := script.ListFiles(wasmSrc).String()
 		if err != nil {
