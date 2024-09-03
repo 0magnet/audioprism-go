@@ -129,7 +129,7 @@ var RootCmd = &cobra.Command{
 			}
 
 			if devMode {
-				execTpl := `bash -c 'GOOS=js GOARCH=wasm {{.Tiny}}go build -trimpath --ldflags "{{.Height}}{{.Width}}-s -w" {{.Target}} -o /dev/stdout {{.WasmPath}}'`
+				execTpl := `bash -c 'GOOS=js GOARCH=wasm {{.Tiny}}go build -trimpath --ldflags "{{.Height}}{{.Width}}-s -w" {{.Target}}  -o /dev/stdout {{.WasmPath}}'`
 				tmpl, err := template.New("exec").Parse(execTpl)
 				if err != nil {
 					log.Fatalf("Error parsing template: %v", err)
@@ -436,14 +436,14 @@ var genCmd = &cobra.Command{
 		}
 		fmt.Println("compiling wasm binary")
 		if tinyGo {
-			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w' --no-debug -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
-			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			fmt.Println(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
-			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w' -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm go build -trimpath --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
 			if err != nil {
 				log.Fatal(err)
 			}

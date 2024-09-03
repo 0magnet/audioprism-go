@@ -1,6 +1,5 @@
-
 // Package main cmd/wasm/wasm.go
-//CREATED BY GO GENERATE DO NOT EDIT!
+// CREATED BY GO GENERATE DO NOT EDIT!
 package main
 
 import (
