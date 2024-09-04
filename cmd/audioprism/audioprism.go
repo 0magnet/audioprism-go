@@ -18,6 +18,7 @@ import (
 
 	fyneui "github.com/0magnet/audioprism-go/cmd/fyne/commands"
 	gomobileui "github.com/0magnet/audioprism-go/cmd/gomobile/commands"
+	tcellui "github.com/0magnet/audioprism-go/cmd/tcell/commands"
 	wasm "github.com/0magnet/audioprism-go/cmd/wasm/commands"
 )
 
@@ -26,6 +27,7 @@ func init() {
 		fyneui.RootCmd,
 		gomobileui.RootCmd,
 		wasm.RootCmd,
+		tcellui.RootCmd,
 	)
 	fyneui.RootCmd.Use = "f"
 	fyneui.RootCmd.Long = `
@@ -45,6 +47,12 @@ func init() {
 	│││├─┤└─┐│││
 	└┴┘┴ ┴└─┘┴ ┴
 	` + "Audio Spectrogram Visualization in Webassembly"
+	tcellui.RootCmd.Use = "t"
+	tcellui.RootCmd.Long = `
+	┌┬┐┌─┐┌─┐┬  ┬
+	 │ │  ├┤ │  │
+	 ┴ └─┘└─┘┴─┘┴─┘
+	` + "Audio Spectrogram Visualization with Tcell TUI"
 	var helpflag bool
 	RootCmd.SetUsageTemplate(help)
 	RootCmd.PersistentFlags().BoolVarP(&helpflag, "help", "h", false, "help for "+RootCmd.Use)

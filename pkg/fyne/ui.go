@@ -181,7 +181,7 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 		}
 	}()
 
-	w.Resize(fyne.NewSize(800, 600))
+	w.Resize(fyne.NewSize(float32(width), float32(height)))
 	if stream != nil {
 		stream.Start()
 		defer stream.Stop()

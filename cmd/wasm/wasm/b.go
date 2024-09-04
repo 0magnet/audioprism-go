@@ -17,7 +17,7 @@ import (
 
 var (
 	width, height                                             string
-	tinygo                                             string
+	tinygo                                                    string
 	w                                                         = 512
 	h                                                         = 512
 	gl, t, wskt, sP, uSampler, vPos, vTexCoord, vBuff, tCBuff js.Value //nolint:unused
@@ -224,7 +224,7 @@ func updateFPSDisplay() {
 		fps = float64(frameCount) / elapsedTime
 		startTime = currentTime
 		frameCount = 0
-		fpsDisplay.Set("innerHTML", "Time: " + currentTime.Format("15:04:05") + "<br>FPS: " + strconv.FormatFloat(fps, 'f', 2, 64))
+		fpsDisplay.Set("innerHTML", "Time: "+currentTime.Format("15:04:05")+"<br>FPS: "+strconv.FormatFloat(fps, 'f', 2, 64))
 	}
 }
 
@@ -281,6 +281,7 @@ func initBuffers() {
 }
 
 var fullTextureData = make([]byte, w*h*4)
+
 func renderSpect() {
 	gl.Call("clearColor", 0, 0, 0, 1)
 	gl.Call("clear", glTypes.ColorBufferBit)

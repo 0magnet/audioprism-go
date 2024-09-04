@@ -75,7 +75,7 @@ type commandTpl struct {
 	WasmPath string
 	Height   string
 	Width    string
-	LDFlags    string
+	LDFlags  string
 }
 
 // RootCmd is the root cli command
@@ -143,11 +143,11 @@ var RootCmd = &cobra.Command{
 				if width != 512 {
 					data.Width = " -X='main.width=" + strconv.Itoa(width) + "' "
 				}
-				data.LDFlags=" -s -w "
+				data.LDFlags = " -s -w "
 
 				htmlPageTemplateData.WasmExecJs = htmpl.JS(wasmExecScript) //nolint
 				if tinyGo {
-					data.LDFlags=" -X='main.tinygo=true' "
+					data.LDFlags = " -X='main.tinygo=true' "
 					data.Tiny = "tiny"
 					data.Target = "-target wasm "
 					htmlPageTemplateData.Title = "audioprism-go WASM tinygo dev mode"

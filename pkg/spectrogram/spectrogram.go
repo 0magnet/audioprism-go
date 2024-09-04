@@ -31,6 +31,7 @@ var (
 	AudioBufferLock sync.Mutex
 )
 
+// SetSingleThreaded avoids the use of goroutines in go-dsp/fft library
 func SetSingleThreaded() {
 	fft.SetWorkerPoolSize(-1)
 }
