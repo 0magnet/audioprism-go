@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	fyne.io/fyne/v2 v2.5.1
-	github.com/0magnet/go-dsp v0.0.0-20240903231535-ddbeeba83b5c
+	github.com/0magnet/go-dsp v0.0.0-20240904142445-fbdef4cfda8a
 	github.com/bitfield/script v0.22.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/ivanpirog/coloredcobra v1.0.1
@@ -51,6 +51,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mjibson/go-dsp v0.0.0-20180508042940-11479a337f12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.4.0 // indirect
@@ -75,3 +76,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mvdan.cc/sh/v3 v3.7.0 // indirect
 )
+
+//replace github.com/0magnet/go-dsp => github.com/0magnet/go-dsp v0.0.0-20240904142445-fbdef4cfda8a

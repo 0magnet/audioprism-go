@@ -51,7 +51,7 @@ fyne.io/fyne/v2/widget
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/0magnet/go-dsp v0.0.0-20240903231535-ddbeeba83b5c
+# github.com/0magnet/go-dsp v0.0.0-20240904142445-fbdef4cfda8a
 ## explicit; go 1.23.0
 github.com/0magnet/go-dsp/dsputils
 github.com/0magnet/go-dsp/fft
@@ -238,6 +238,8 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
+# github.com/mjibson/go-dsp v0.0.0-20180508042940-11479a337f12
+## explicit
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 ## explicit
 github.com/modern-go/concurrent
