@@ -439,8 +439,8 @@ var genCmd = &cobra.Command{
 		}
 		fmt.Println("compiling wasm binary")
 		if tinyGo {
-			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
-			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-s -w'  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
+			fmt.Println(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-X=main.tinygo=true' -target wasm  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`)
+			_, err = script.Exec(`bash -c "GOOS=js GOARCH=wasm tinygo build --ldflags '-X=main.tinygo=true' -target wasm  -o ` + writePath + `bundle.wasm ` + strings.TrimRight(wasmSourceFiles, "\r\n") + `"`).Stdout()
 			if err != nil {
 				log.Fatal(err)
 			}
