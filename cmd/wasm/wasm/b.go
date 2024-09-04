@@ -78,15 +78,12 @@ func initWS() {
 		log.Fatal("WebSocket not supported in this browser")
 		return
 	}
-
 	log.Printf("Connected to WebSocket at %s\n", wsURL)
-
 	ws.Call("addEventListener", "message", js.FuncOf(func(this js.Value, p []js.Value) interface{} { //nolint
 		data := p[0].Get("data")
 		if data.IsUndefined() {
 			return nil
 		}
-
 		if data.Type() == js.TypeString {
 			b, err := base64.StdEncoding.DecodeString(data.String())
 			if err != nil {
@@ -107,10 +104,8 @@ func initWS() {
 		} else {
 			log.Printf("Received data of unexpected type: %s", data.Type().String())
 		}
-
 		return nil
 	}))
-
 	wskt = ws
 }
 
@@ -130,7 +125,6 @@ func processAudio(p []float32) (int, error) { //nolint
 			newColumn[y*4+2] = byte(b >> 8)
 			newColumn[y*4+3] = byte(a >> 8)
 		}
-
 		sgHist[sgHistIndex] = newColumn
 		sgHistIndex = (sgHistIndex + 1) % historySize
 	}
@@ -140,12 +134,10 @@ func processAudio(p []float32) (int, error) { //nolint
 func initGL() {
 	doc := js.Global().Get("document")
 	c := doc.Call("getElementById", "gocanvas")
-
 	if c.IsUndefined() {
 		log.Fatal("Canvas element with ID 'gocanvas' not found")
 		return
 	}
-
 	c.Set("width", w)
 	c.Set("height", h)
 	gl = c.Call("getContext", "webgl")
@@ -162,28 +154,22 @@ func initGL() {
 func initShaders() {
 	vSh := compileShader(vShadSrc, glTypes.VertexShader)
 	fSh := compileShader(fShadSrc, glTypes.FragmentShader)
-
 	sP = gl.Call("createProgram")
 	gl.Call("attachShader", sP, vSh)
 	gl.Call("attachShader", sP, fSh)
 	gl.Call("linkProgram", sP)
-
 	if !gl.Call("getProgramParameter", sP, glTypes.LinkStatus).Bool() {
 		log.Fatal("Could not initialize shaders: ", gl.Call("getProgramInfoLog", sP).String())
 	}
-
 	gl.Call("useProgram", sP)
-
 	uSampler = gl.Call("getUniformLocation", sP, "uSampler")
 	if uSampler.IsNull() {
 		log.Fatal("Failed to get uniform location for uSampler")
 	}
-
 	vPos = gl.Call("getAttribLocation", sP, "position")
 	if vPos.IsNull() {
 		log.Fatal("Failed to get attribute location for position")
 	}
-
 	vTexCoord = gl.Call("getAttribLocation", sP, "texCoord")
 	if vTexCoord.IsNull() {
 		log.Fatal("Failed to get attribute location for texCoord")
@@ -194,11 +180,9 @@ func compileShader(src string, sT js.Value) js.Value {
 	s := gl.Call("createShader", sT)
 	gl.Call("shaderSource", s, src)
 	gl.Call("compileShader", s)
-
 	if !gl.Call("getShaderParameter", s, glTypes.CompileStatus).Bool() {
 		log.Fatal("Shader compilation failed: ", gl.Call("getShaderInfoLog", s).String())
 	}
-
 	return s
 }
 
@@ -228,19 +212,29 @@ func createFPSDisplay() {
 	fpsDisplay.Get("style").Set("bottom", "10px")
 	fpsDisplay.Get("style").Set("left", "10px")
 	fpsDisplay.Get("style").Set("color", "white")
-	fpsDisplay.Set("innerHTML", "FPS: 0")
+	fpsDisplay.Set("innerHTML", "Time: 00:00:00<br>FPS: 0") // Initial structure
 	doc.Get("body").Call("appendChild", fpsDisplay)
+}
+
+func updateFPSDisplay() {
+	frameCount++
+	currentTime := time.Now()
+	elapsedTime := currentTime.Sub(startTime).Seconds()
+	if elapsedTime > 2 {
+		fps = float64(frameCount) / elapsedTime
+		startTime = currentTime
+		frameCount = 0
+		fpsDisplay.Set("innerHTML", "Time: " + currentTime.Format("15:04:05") + "<br>FPS: " + strconv.FormatFloat(fps, 'f', 2, 64))
+	}
 }
 
 func renderLoop() {
 	log.Println("Starting render loop")
-
 	rndrFr = js.FuncOf(func(this js.Value, args []js.Value) interface{} { //nolint
 		renderSpect()
 		js.Global().Call("requestAnimationFrame", rndrFr)
 		return nil
 	})
-
 	js.Global().Call("requestAnimationFrame", rndrFr)
 }
 
@@ -273,7 +267,6 @@ func setupVertexAttribs() {
 	gl.Call("enableVertexAttribArray", vPos)
 	gl.Call("vertexAttribPointer", vPos, 3, glTypes.Float, false, 0, 0)
 	checkGLError("Error setting vertex attribute pointer")
-
 	gl.Call("bindBuffer", glTypes.ArrayBuffer, tCBuff)
 	gl.Call("enableVertexAttribArray", vTexCoord)
 	gl.Call("vertexAttribPointer", vTexCoord, 2, glTypes.Float, false, 0, 0)
@@ -294,9 +287,6 @@ func renderSpect() {
 	checkGLError("Error clearing canvas")
 	gl.Call("bindTexture", glTypes.Texture2D, t)
 	checkGLError("Error binding texture")
-
-	//	/*
-	//reduce texSubImage2D usage
 	for x := 0; x < len(sgHist); x++ {
 		index := (sgHistIndex + x) % len(sgHist)
 		copy(fullTextureData[x*h*4:(x+1)*h*4], sgHist[index])
@@ -304,37 +294,12 @@ func renderSpect() {
 	js.CopyBytesToJS(uint8Array, fullTextureData)
 	gl.Call("texSubImage2D", glTypes.Texture2D, 0, 0, 0, w, h, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
 	checkGLError("Error updating texture data")
-	//	*/
-	/*
-
-		//original method - slow
-			for x := 0; x < len(sgHist); x++ {
-				index := (sgHistIndex + x) % len(sgHist)
-				arrayBuffer := js.Global().Get("ArrayBuffer").New(len(sgHist[index]))
-				uint8Array := js.Global().Get("Uint8Array").New(arrayBuffer)
-				js.CopyBytesToJS(uint8Array, sgHist[index])
-				gl.Call("texSubImage2D", glTypes.Texture2D, 0, x, 0, 1, len(sgHist[index])/4, glTypes.RGBA, glTypes.UnsignedByte, uint8Array)
-				checkGLError("Error updating texture data")
-			}
-	*/
 	gl.Call("uniform1i", uSampler, 0)
 	checkGLError("Error setting uniform sampler")
 	setupVertexAttribs()
 	gl.Call("drawArrays", glTypes.TriangleStrip, 0, 4)
 	checkGLError("Error drawing arrays")
 	updateFPSDisplay()
-}
-
-func updateFPSDisplay() {
-	frameCount++
-	currentTime := time.Now()
-	elapsedTime := time.Since(startTime).Seconds()
-	if elapsedTime > 2000 {
-		fps = float64(frameCount) / (elapsedTime / 1000.0)
-		startTime = currentTime
-		fpsDisplay.Set("innerHTML", "FPS: "+strconv.FormatFloat(fps, 'f', 2, 64)+" Frames: "+strconv.Itoa(frameCount))
-		frameCount = 0
-	}
 }
 
 func checkGLError(stage string) {
@@ -348,7 +313,6 @@ const vShadSrc = `
 attribute vec4 position;
 attribute vec2 texCoord;
 varying vec2 vTexCoord;
-
 void main() {
     gl_Position = position;
 	vTexCoord = vec2(texCoord.y, texCoord.x);
