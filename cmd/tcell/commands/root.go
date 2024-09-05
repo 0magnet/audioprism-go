@@ -34,7 +34,7 @@ var RootCmd = &cobra.Command{
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
 	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-	` + "Audio Spectrogram Visualization with Fyne GUI",
+	` + "Audio Spectrogram Visualization with github.com/gdamore/tcell Tcell TUI",
 	Run: func(_ *cobra.Command, _ []string) {
 		ui.Run(w, h, u, b, s, k)
 	},

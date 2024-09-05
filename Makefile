@@ -52,13 +52,18 @@ test: ## Run tests if test files are present
 	else \
 		echo "No test files found. Skipping tests."; \
 	fi
+	make test-help
+
+test-help: ##check of compilation
+	go run cmd/fyne/fyne.go --help
+	go run cmd/gomobile/gomobile.go --help
+	go run cmd/tcell/tcell.go --help
+	go run cmd/wasm/wasm.go --help
 	go run cmd/audioprism/audioprism.go --help
 	go run cmd/audioprism/audioprism.go f --help
 	go run cmd/audioprism/audioprism.go m --help
+	go run cmd/audioprism/audioprism.go t --help
 	go run cmd/audioprism/audioprism.go w --help
-	go run cmd/fyne/fyne.go --help
-	go run cmd/gomobile/gomobile.go --help
-	go run cmd/wasm/wasm.go --help
 
 format: tidy ## Formats the code. Requires goimports and goimports-reviser
 	$(LINT_OPTS) goimports -w -local $(PROJECT_BASE) ./pkg ./cmd
