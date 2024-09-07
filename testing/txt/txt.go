@@ -1,3 +1,4 @@
+// go run testing/txt/txt.go | aplay -f S16_LE -r 44100 -c 1
 package main
 
 import (

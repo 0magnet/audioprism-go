@@ -1,3 +1,5 @@
+// go run testing/img/img.go | aplay -f S16_LE -r 44100 -c 1
+
 package main
 
 import (
@@ -14,7 +16,7 @@ import (
 // Constants for audio settings
 const (
 	sampleRate = 44100 // Sample rate in Hz
-	duration   = 20     // Duration of the sound in seconds
+	duration   = 30     // Duration of the sound in seconds
 	amplitude  = 0.5   // Amplitude of the sine waves
 	quiet      = 0     // Silence level
 )
