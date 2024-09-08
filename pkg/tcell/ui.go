@@ -21,13 +21,12 @@ var (
 	spectrogramHistory    [][]color.Color
 	historyIndex          int
 	termWidth, termHeight int
-	width, height         int // Global width and height variables
+	width, height         int
 	screen                tcell.Screen
 )
 
 // Run initializes and starts the Tcell application
-func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
-	// Initialize Tcell screen
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
 	var err error
 	screen, err = tcell.NewScreen()
 	if err != nil {
@@ -38,7 +37,6 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 	}
 	defer screen.Fini()
 
-	// Get the terminal's size
 	termWidth, termHeight = screen.Size()
 	width = termWidth
 	height = termHeight
@@ -57,7 +55,6 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 	var stream *pulse.RecordStream
 	var audioCtx *pulse.Client
 	if wsURL == "" {
-		// Initialize PulseAudio client and stream
 		audioCtx, err = pulse.NewClient()
 		if err != nil {
 			log.Fatal(err)
@@ -74,14 +71,12 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 			}
 		}()
 	} else {
-		// Parse the WebSocket URL to determine the correct origin
 		u, err := url.Parse(wsURL)
 		if err != nil {
 			log.Fatal("Invalid WebSocket URL:", err)
 		}
 		origin := u.Scheme + "://" + u.Host
 
-		// Connect to WebSocket server using the provided URL and dynamic origin
 		ws, err := websocket.Dial(wsURL, "", origin)
 		if err != nil {
 			log.Fatal("WebSocket connection failed:", err)
@@ -92,7 +87,6 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 			}
 		}()
 
-		// Start listening to WebSocket in a separate goroutine
 		go func() {
 			for {
 				var encodedData string
@@ -100,21 +94,18 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 				if err != nil {
 					log.Println("Error receiving WebSocket data:", err)
 					if err == websocket.ErrBadFrame {
-						// If the connection is closed, exit the goroutine
 						return
 					}
 					continue
 				}
 
-				// Decode Base64 data back to []byte
 				data, err := base64.StdEncoding.DecodeString(encodedData)
 				if err != nil {
 					log.Println("Error decoding Base64 data:", err)
 					continue
 				}
 
-				// Convert received []byte data back to []float32
-				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+				floatData := make([]float32, len(data)/4)
 				for i := range floatData {
 					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
 						uint32(data[i*4+1])<<8 |
@@ -122,7 +113,6 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 						uint32(data[i*4+3])<<24)
 				}
 
-				// Process the audio data directly
 				_, err = processAudio(floatData)
 				if err != nil {
 					log.Fatal(err)
@@ -146,8 +136,8 @@ func Run(_, _, _, _ int, fpsDisp bool, wsURL string) {
 			}
 		case *tcell.EventResize:
 			termWidth, termHeight = screen.Size()
-			width = termWidth   // Update width
-			height = termHeight // Update height
+			width = termWidth
+			height = termHeight
 			screen.Sync()
 		}
 	}
@@ -177,7 +167,6 @@ func renderLoop(fpsDisp bool) {
 }
 
 func drawSpectrogram() {
-	// Adjust to fit terminal width and height
 	scaleX := float64(width) / float64(termWidth)
 	scaleY := float64(height) / float64(termHeight)
 
@@ -211,7 +200,7 @@ func processAudio(p []float32) (int, error) {
 	for len(p)-start >= spectrogram.FFTSize {
 		magnitudes := spectrogram.ComputeFFT(p[start : start+spectrogram.FFTSize])
 		start += step
-		currentRow := make([]color.Color, height) // Using the global height
+		currentRow := make([]color.Color, height)
 		for y := 0; y < height; y++ {
 			freq := float64(y) / float64(height) * 12000
 			bin := int(freq * float64(spectrogram.FFTSize) / 44100)

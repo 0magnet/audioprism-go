@@ -29,7 +29,7 @@ var (
 )
 
 // Run initializes and starts the Fyne application
-func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
 	width = wid
 	height = hei
 	a := app.New()
@@ -76,7 +76,6 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 	var stream *pulse.RecordStream
 	var audioCtx *pulse.Client
 	if wsURL == "" {
-		// Initialize PulseAudio client and stream
 		var err error
 		audioCtx, err = pulse.NewClient()
 		if err != nil {
@@ -94,14 +93,11 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 			}
 		}()
 	} else {
-		// Parse the WebSocket URL to determine the correct origin
 		u, err := url.Parse(wsURL)
 		if err != nil {
 			log.Fatal("Invalid WebSocket URL:", err)
 		}
 		origin := u.Scheme + "://" + u.Host
-
-		// Connect to WebSocket server using the provided URL and dynamic origin
 		ws, err := websocket.Dial(wsURL, "", origin)
 		if err != nil {
 			log.Fatal("WebSocket connection failed:", err)
@@ -112,7 +108,6 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 			}
 		}()
 
-		// Start listening to WebSocket in a separate goroutine
 		go func() {
 			for {
 				var encodedData string
@@ -120,21 +115,18 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 				if err != nil {
 					log.Println("Error receiving WebSocket data:", err)
 					if err == websocket.ErrBadFrame {
-						// If the connection is closed, exit the goroutine
 						return
 					}
 					continue
 				}
 
-				// Decode Base64 data back to []byte
 				data, err := base64.StdEncoding.DecodeString(encodedData)
 				if err != nil {
 					log.Println("Error decoding Base64 data:", err)
 					continue
 				}
 
-				// Convert received []byte data back to []float32
-				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+				floatData := make([]float32, len(data)/4)
 				for i := range floatData {
 					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
 						uint32(data[i*4+1])<<8 |
@@ -142,7 +134,6 @@ func Run(wid, hei, _, _ int, fpsDisp bool, wsURL string) {
 						uint32(data[i*4+3])<<24)
 				}
 
-				// Process the audio data directly
 				_, err = processAudio(floatData)
 				if err != nil {
 					log.Fatal(err)

@@ -36,14 +36,14 @@ var (
 )
 
 // Run initializes and starts the Gomobile application
-func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
-	width = w
-	height = h
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
+	width = wid
+	height = hei
 	showFPS = fpsDisp
 
 	sgHist = make([][]byte, width)
 	for i := range sgHist {
-		sgHist[i] = make([]byte, height*4) // RGBA
+		sgHist[i] = make([]byte, height*4)
 	}
 	var stream *pulse.RecordStream
 	if wsURL == "" {
@@ -86,7 +86,7 @@ func Run(w, h, _, _ int, fpsDisp bool, wsURL string) {
 					log.Println("Error decoding Base64 data:", err)
 					continue
 				}
-				floatData := make([]float32, len(data)/4) // Each float32 is 4 bytes
+				floatData := make([]float32, len(data)/4)
 				for i := range floatData {
 					floatData[i] = math.Float32frombits(uint32(data[i*4]) |
 						uint32(data[i*4+1])<<8 |

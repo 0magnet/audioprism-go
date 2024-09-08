@@ -5,31 +5,13 @@ import (
 	"image/color"
 	"math"
 	"math/cmplx"
-	"sync"
 
 	"github.com/0magnet/go-dsp/fft"
 	"github.com/0magnet/go-dsp/window"
 )
 
-const (
-	// FFTSize is the size of the FFT window.
-	FFTSize = 1024
-
-	// OverlapRatio is the ratio of overlap between consecutive FFT windows.
-	OverlapRatio = 0.5
-
-	// MinMagnitude is the minimum magnitude value for normalization.
-	MinMagnitude = 0.0
-
-	// MaxMagnitude is the maximum magnitude value for normalization.
-	MaxMagnitude = 45.0
-)
-
-// AudioBuffer stores the audio samples for processing.
-var (
-	AudioBuffer     []float32
-	AudioBufferLock sync.Mutex
-)
+// FFTSize is the recommended default FFT size
+const FFTSize = 1024
 
 // SetSingleThreaded avoids the use of goroutines in go-dsp/fft library
 func SetSingleThreaded() {
@@ -94,8 +76,13 @@ func ValueToPixelGrayscale(value float64) color.Color {
 
 // MagnitudeToPixel converts a magnitude value to a pixel color.
 func MagnitudeToPixel(value float64) color.Color {
+	// minimum magnitude value for normalization.
+	minMagnitude := 0.0
+
+	// maximum magnitude value for normalization.
+	maxMagnitude := 45.0
 	value = 20 * math.Log10(value+1e-10)
-	return ValueToPixelHeat(Normalize(value, MinMagnitude, MaxMagnitude))
+	return ValueToPixelHeat(Normalize(value, minMagnitude, maxMagnitude))
 }
 
 // ComputeFFT computes the FFT of the input and returns the magnitudes.
@@ -112,19 +99,4 @@ func ComputeFFT(input []float32) []float64 {
 		magnitudes[i] = cmplx.Abs(spectrum[i])
 	}
 	return magnitudes
-}
-
-// GetAudioChunk retrieves a chunk of the audio buffer for FFT processing.
-func GetAudioChunk() []float32 {
-	AudioBufferLock.Lock()
-	defer AudioBufferLock.Unlock()
-
-	if len(AudioBuffer) < FFTSize {
-		return nil
-	}
-
-	chunk := AudioBuffer[:FFTSize]
-	stepSize := int(float64(FFTSize) * (1 - OverlapRatio))
-	AudioBuffer = AudioBuffer[stepSize:]
-	return chunk
 }
