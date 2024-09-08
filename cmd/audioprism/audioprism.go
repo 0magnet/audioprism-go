@@ -240,7 +240,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/0magnet/audioprism-go/pkg/{{.Name}}"
+	ui "github.com/0magnet/audioprism-go/pkg/{{.Name}}"
 )
 
 var (
