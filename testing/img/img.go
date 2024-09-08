@@ -5,8 +5,8 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	"image/color"
 	"image"
+	"image/color"
 	"image/png"
 	"log"
 	"math"
@@ -16,7 +16,7 @@ import (
 // Constants for audio settings
 const (
 	sampleRate = 44100 // Sample rate in Hz
-	duration   = 30     // Duration of the sound in seconds
+	duration   = 30    // Duration of the sound in seconds
 	amplitude  = 0.5   // Amplitude of the sine waves
 	quiet      = 0     // Silence level
 )
@@ -47,12 +47,12 @@ func main() {
 	// Create a buffer to hold the generated audio data
 	audioData := make([]float64, sampleRate*duration)
 	log.Printf("created buffer make([]float64,%v) \n", sampleRate*duration)
-	pstep := (height-1)/8
+	pstep := (height - 1) / 8
 	fstep := 180
-	p:=0
-	f:=1600
+	p := 0
+	f := 1600
 	// Process the top row
-//	processRow(img, 0, 1600, segmentSampleCount, audioData)
+	//	processRow(img, 0, 1600, segmentSampleCount, audioData)
 	processRow(img, p, float64(f), segmentSampleCount, audioData)
 	p += pstep
 	f -= fstep
@@ -75,7 +75,7 @@ func main() {
 	p += pstep
 	f -= fstep
 	processRow(img, p, float64(f), segmentSampleCount, audioData)
-//	processRow(img, 0, 1600, segmentSampleCount, audioData)
+	//	processRow(img, 0, 1600, segmentSampleCount, audioData)
 
 	// Process the bottom row
 	processRow(img, height-1, 160, segmentSampleCount, audioData)

@@ -1,5 +1,5 @@
 // Package main cmd/fyne/fyne.go
-//CREATED WITH GO GENERATE DO NOT EDIT!
+// CREATED WITH GO GENERATE DO NOT EDIT!
 package main
 
 import (

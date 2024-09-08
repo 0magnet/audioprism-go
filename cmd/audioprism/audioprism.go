@@ -185,7 +185,7 @@ var genCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-				_, err := script.Echo("===>" + path + dir + "/commands/root.go<===\n" + buf.String()+"`\n").Stdout()
+				_, err := script.Echo("===>" + path + dir + "/commands/root.go<===\n" + buf.String() + "`\n").Stdout()
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -266,11 +266,11 @@ var RootCmd = &cobra.Command{
 	DisableFlagsInUseLine: true,
 	Use:                   "{{.Name}}",
 	Short:                 "with {{.Name}}",
-	Long: `+"`"+`
+	Long: ` + "`" + `
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
 	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-	`+"`"+` + "Audio Spectrogram Visualization with {{.Name}}",
+	` + "`" + ` + "Audio Spectrogram Visualization with {{.Name}}",
 	Run: func(_ *cobra.Command, _ []string) {
 		ui.Run(w, h, u, b, s, k)
 	},

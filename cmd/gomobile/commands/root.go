@@ -1,5 +1,5 @@
 // Package commands cmd/gomobile/commands/root.go
-//CREATED WITH GO GENERATE DO NOT EDIT!
+// CREATED WITH GO GENERATE DO NOT EDIT!
 package commands
 
 import (

@@ -1,5 +1,5 @@
 // Package commands cmd/fyne/commands/root.go
-//CREATED WITH GO GENERATE DO NOT EDIT!
+// CREATED WITH GO GENERATE DO NOT EDIT!
 package commands
 
 import (
