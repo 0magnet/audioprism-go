@@ -1,10 +1,11 @@
-// Package commands cmd/fyne/commands/root.go
+// Package commands cmd/tcell/commands/root.go
+//CREATED WITH GO GENERATE DO NOT EDIT!
 package commands
 
 import (
 	"github.com/spf13/cobra"
 
-	ui "github.com/0magnet/audioprism-go/pkg/tcell"
+	"github.com/0magnet/audioprism-go/pkg/tcell"
 )
 
 var (
@@ -29,13 +30,22 @@ var RootCmd = &cobra.Command{
 	DisableSuggestions:    true,
 	DisableFlagsInUseLine: true,
 	Use:                   "tcell",
-	Short:                 "with tcell TUI",
+	Short:                 "with tcell",
 	Long: `
 	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
 	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-	` + "Audio Spectrogram Visualization with github.com/gdamore/tcell Tcell TUI",
+	` + "Audio Spectrogram Visualization with tcell",
 	Run: func(_ *cobra.Command, _ []string) {
 		ui.Run(w, h, u, b, s, k)
 	},
 }
+
+const help = `{{if gt (len .Aliases) 0}}{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand)}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}
+
+`

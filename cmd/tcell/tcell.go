@@ -1,5 +1,5 @@
 // Package main cmd/tcell/tcell.go
-// CREATED BY GO GENERATE DO NOT EDIT!
+//CREATED WITH GO GENERATE DO NOT EDIT!
 package main
 
 import (

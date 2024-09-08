@@ -130,11 +130,11 @@ type tplData struct {
 
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "generate subcommand wrappers from template",
-	Long:  "generate subcommand wrappers from template",
+	Short: "generate subcommands from template",
+	Long:  "generate subcommands from template",
 	Run: func(_ *cobra.Command, _ []string) {
 
-		tmpl, err := template.New("main").Parse(command)
+		cmdTmpl, err := template.New("main").Parse(command)
 		if err != nil {
 			log.Fatal("Error parsing template:", err)
 		}
@@ -144,7 +144,7 @@ var genCmd = &cobra.Command{
 		}
 		for _, dir := range dirs {
 			var buf bytes.Buffer
-			err = tmpl.Execute(&buf, tplData{
+			err = cmdTmpl.Execute(&buf, tplData{
 				Name: dir,
 			})
 			if err != nil {
@@ -156,8 +156,36 @@ var genCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-
 				_, err := script.Echo("===>" + path + dir + "/" + dir + ".go<===\n" + buf.String() + "\n" + "const help = `" + help + "`\n").Stdout()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+
+		cmdsTmpl, err := template.New("niam").Parse(commands)
+		if err != nil {
+			log.Fatal("Error parsing template:", err)
+		}
+		dirs, err = script.ListFiles(path).Basename().Reject("audioprism").Reject("wasm").Slice()
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, dir := range dirs {
+			var buf bytes.Buffer
+			err = cmdsTmpl.Execute(&buf, tplData{
+				Name: dir,
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+			if writeOut {
+				_, err := script.Echo(buf.String() + "\n" + "const help = `" + help + "`").WriteFile(path + dir + "/commands/root.go")
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				_, err := script.Echo("===>" + path + dir + "/commands/root.go<===\n" + buf.String()+"`\n").Stdout()
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -166,9 +194,8 @@ var genCmd = &cobra.Command{
 	},
 }
 
-const command = `
-// Package main cmd/{{.Name}}/{{.Name}}.go
-//CREATED BY GO GENERATE DO NOT EDIT!
+const command = `// Package main cmd/{{.Name}}/{{.Name}}.go
+//CREATED WITH GO GENERATE DO NOT EDIT!
 package main
 
 import (
@@ -203,5 +230,49 @@ func main() {
 	if err := commands.RootCmd.Execute(); err != nil {
 		panic(err)
 	}
+}
+`
+
+const commands = `// Package commands cmd/{{.Name}}/commands/root.go
+//CREATED WITH GO GENERATE DO NOT EDIT!
+package commands
+
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/0magnet/audioprism-go/pkg/{{.Name}}"
+)
+
+var (
+	w, h, u, b int
+	s          bool
+	k          string
+)
+
+func init() {
+	RootCmd.Flags().IntVarP(&w, "width", "x", 512, "initial window width")
+	RootCmd.Flags().IntVarP(&h, "height", "y", 512, "initial window height")
+	RootCmd.Flags().IntVarP(&u, "up", "u", 60, "fps rate - 0 unlimits")
+	RootCmd.Flags().IntVarP(&b, "buf", "b", 32768, "size of audio buffer")
+	RootCmd.Flags().BoolVarP(&s, "fps", "s", false, "show fps")
+	RootCmd.Flags().StringVarP(&k, "websocket", "k", "", "websocket url (i.e. 'ws://127.0.0.1:8080/ws')")
+}
+
+// RootCmd contains the root command
+var RootCmd = &cobra.Command{
+	SilenceErrors:         true,
+	SilenceUsage:          true,
+	DisableSuggestions:    true,
+	DisableFlagsInUseLine: true,
+	Use:                   "{{.Name}}",
+	Short:                 "with {{.Name}}",
+	Long: `+"`"+`
+	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
+	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
+	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
+	`+"`"+` + "Audio Spectrogram Visualization with {{.Name}}",
+	Run: func(_ *cobra.Command, _ []string) {
+		ui.Run(w, h, u, b, s, k)
+	},
 }
 `
