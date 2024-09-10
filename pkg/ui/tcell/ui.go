@@ -1,5 +1,5 @@
-// Package tcellui pkg/tcell/ui.go
-package tcellui
+// Package ui pkg/ui/tcell/ui.go
+package ui
 
 import (
 	"encoding/base64"
@@ -26,7 +26,7 @@ var (
 )
 
 // Run initializes and starts the Tcell application
-func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) { //nolint:revive
 	var err error
 	screen, err = tcell.NewScreen()
 	if err != nil {

@@ -131,7 +131,7 @@ type tplData struct {
 var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "generate subcommands from template",
-	Long:  "generate subcommands from template",
+	Long:  "generating subcommands from template should only be attempted when run from source",
 	Run: func(_ *cobra.Command, _ []string) {
 
 		cmdTmpl, err := template.New("main").Parse(command)
@@ -240,7 +240,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	ui "github.com/0magnet/audioprism-go/pkg/{{.Name}}"
+	ui "github.com/0magnet/audioprism-go/pkg/ui/{{.Name}}"
 )
 
 var (

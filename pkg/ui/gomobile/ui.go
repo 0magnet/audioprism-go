@@ -1,5 +1,5 @@
-// Package gomobile pkg/gomobile/ui.go
-package gomobile
+// Package ui pkg/ui/gomobile/ui.go
+package ui
 
 import (
 	"encoding/base64"
@@ -36,7 +36,7 @@ var (
 )
 
 // Run initializes and starts the Gomobile application
-func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) { //nolint:revive
 	width = wid
 	height = hei
 	showFPS = fpsDisp

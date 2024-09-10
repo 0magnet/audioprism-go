@@ -1,5 +1,5 @@
-// Package fyneui pkg/fyne/ui.go
-package fyneui
+// Package ui pkg/ui/fyne/ui.go
+package ui
 
 import (
 	"encoding/base64"
@@ -29,7 +29,7 @@ var (
 )
 
 // Run initializes and starts the Fyne application
-func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) {
+func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) { //nolint:revive
 	width = wid
 	height = hei
 	a := app.New()

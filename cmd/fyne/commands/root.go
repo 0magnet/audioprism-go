@@ -5,7 +5,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	ui "github.com/0magnet/audioprism-go/pkg/fyne"
+	ui "github.com/0magnet/audioprism-go/pkg/ui/fyne"
 )
 
 var (
