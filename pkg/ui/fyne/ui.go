@@ -33,7 +33,7 @@ func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) { //nolint:re
 	width = wid
 	height = hei
 	a := app.New()
-	w := a.NewWindow("audioprism-go")
+	w := a.NewWindow("audioprism-fyne")
 	spectrogramHistory = make([][]color.Color, width)
 	historyIndex = 0
 	for i := range spectrogramHistory {

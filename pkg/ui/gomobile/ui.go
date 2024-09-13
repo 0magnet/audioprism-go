@@ -37,6 +37,7 @@ var (
 
 // Run initializes and starts the Gomobile application
 func Run(wid, hei, fpsRate, bSize int, fpsDisp bool, wsURL string) { //nolint:revive
+	//	sg.SetSingleThreaded()
 	width = wid
 	height = hei
 	showFPS = fpsDisp
