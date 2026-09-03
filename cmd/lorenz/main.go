@@ -1,7 +1,7 @@
 // Command lorenz streams a Lorenz attractor as 32-bit float stereo PCM on
 // stdout (48 kHz), for X-Y oscilloscope visualization — pipe it into ffmpeg.
-// A Go port of the generator test2.sh used to inline in Python, so the repo
-// depends only on the Go toolchain.
+// test2.sh drives it; keeping the generator in Go means the repo depends only
+// on the Go toolchain.
 package main
 
 import (
