@@ -76,7 +76,7 @@ var genCmd = &cobra.Command{
 			log.Fatal("Error parsing template:", err)
 		}
 		// don't overwrite custom implementations
-		dirs, err = script.ListFiles(path).Basename().Reject("wasm").Reject("coreweb").Slice()
+		dirs, err = script.ListFiles(path).Basename().Reject("wasm").Slice()
 		if err != nil {
 			log.Fatal(err)
 		}

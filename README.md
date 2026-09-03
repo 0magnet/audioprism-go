@@ -111,40 +111,6 @@ Flags:
 ```
 
 ```
-go run cmd/core/core.go --help
-┌─┐┌─┐┬─┐┌─┐
-│  │ │├┬┘├┤
-└─┘└─┘┴└─└─┘
-Audio Spectrogram Visualization with core
-
-Usage:
-  core
-
-
-
-Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run cmd/coreweb/coreweb.go --help
-
-	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
-	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
-	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-	Audio Spectrogram Visualization CogentCore Webassembly
-
-Usage:
-  coreweb
-
-
-
-Flags:
-  -y, --height int   height of spectrogram display - set on wasm compilation (default 512)
-  -p, --port int     port to serve on (default 8080)
-  -x, --width int    width of spectrogram display - set on wasm compilation (default 512)
 go run cmd/fyne/fyne.go --help
 ┌─┐┬ ┬┌┐┌┌─┐
 ├┤ └┬┘│││├┤
@@ -372,17 +338,15 @@ gocloc --not-match-d='(vendor|node_modules|\.git)' .
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Go                              41            711           1025           5223
-JavaScript                       4            180             93           1255
-Markdown                         3            122              0            349
-CSS                              1             21              2            124
-BASH                             4             34             47            114
+Go                              56            895           1784           7255
+JavaScript                       1             61             36            478
+Markdown                         3            127              0            383
+Makefile                         1             21             52            107
 YAML                             1              0              7             98
-HTML                             2              8              0             84
-Makefile                         1             14             16             54
+BASH                             4             22             38             83
 Bourne Shell                     1              8             16             30
 JSON                             2              0              0             28
 -------------------------------------------------------------------------------
-TOTAL                           60           1098           1206           7359
+TOTAL                           69           1134           1933           8462
 -------------------------------------------------------------------------------
 ```
