@@ -1,0 +1,62 @@
+name: ci
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# What this runs is what `make check` runs locally, so a green tick here and a
+# clean tree there mean the same thing. The Makefile is the single definition;
+# this file only supplies a machine to run it on.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      # This repo builds with cgo (CGO=1 in the Makefile) and pulls in fyne and
+      # glfw, so it needs development headers a bare runner does not have: fyne's
+      # documented Linux deps, the sound one, and Wayland. glfw 3.4 compiles its
+      # Wayland backend alongside X11, so wayland-client-core.h is required even
+      # for a build that will only ever run under X.
+      #
+      # The cgo package declares `#cgo pkg-config: sdl2 fftw3f libpulse-simple`,
+      # so those three need their development packages present as well or the
+      # package does not compile at all.
+      - run: sudo apt-get update && sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev libasound2-dev libwayland-dev libxkbcommon-dev wayland-protocols libsdl2-dev libfftw3-dev libpulse-dev
+      # make test, not go test ./...: it recurses into nested modules and falls
+      # back to the js/wasm tests under Node where nothing builds for the host,
+      # which is the whole of some of these repos.
+      - run: make test
+      # A compile gate for the js/wasm-tagged half. A wasm-only compile error is
+      # invisible to a host build, and in these repos that is most of the code.
+      - run: make test-wasm
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      # This repo builds with cgo (CGO=1 in the Makefile) and pulls in fyne and
+      # glfw, so it needs the X11, GL and ALSA development headers that a bare
+      # runner does not have. These are fyne's documented Linux build deps plus
+      # the sound one.
+      - run: sudo apt-get update && sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev libasound2-dev libwayland-dev libxkbcommon-dev wayland-protocols libsdl2-dev libfftw3-dev libpulse-dev
+      - name: install golangci-lint
+        # The installer is taken at the same tag as the binary it installs.
+        # Fetching it from master broke every run here: that script matches the
+        # checksums file by prefix, so for a release that also publishes an
+        # SBOM it reads the hash of golangci-lint-*.tar.gz.sbom.json and then
+        # rejects a download that was in fact correct. Pinning also means CI
+        # stops running whatever happens to be on a branch today.
+        env:
+          GOLANGCI_VERSION: v2.12.2
+        run: |
+          curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/${GOLANGCI_VERSION}/install.sh" |
+            sh -s -- -b "$(go env GOPATH)/bin" "${GOLANGCI_VERSION}"
+      # Two passes inside make lint: the host config, then again with GOOS=js,
+      # because a host run cannot see //go:build js && wasm files at all.
+      - run: make lint
