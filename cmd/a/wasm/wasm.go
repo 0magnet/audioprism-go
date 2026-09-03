@@ -1,0 +1,18 @@
+// Package main cmd/a/wasm/wasm.go
+// CREATED WITH GO GENERATE DO NOT EDIT!
+package main
+
+import (
+	"github.com/0magnet/audioprism-go/cmd/a/wasm/commands"
+	"github.com/0magnet/audioprism-go/internal/flags"
+)
+
+func init() {
+	flags.InitFlags(commands.RootCmd, true)
+}
+
+func main() {
+	if err := commands.RootCmd.Execute(); err != nil {
+		panic(err)
+	}
+}

@@ -1,0 +1,17 @@
+// Package main cmd/png/png.go
+package main
+
+import (
+	"github.com/0magnet/audioprism-go/cmd/png/commands"
+	"github.com/0magnet/audioprism-go/internal/flags"
+)
+
+func init() {
+	flags.InitFlags(commands.RootCmd, true)
+}
+
+func main() {
+	if err := commands.RootCmd.Execute(); err != nil {
+		panic(err)
+	}
+}
