@@ -8,12 +8,12 @@ A spectrogram viewer, inspired by [audioprism](https://github.com/vsergeev/audio
 and differing from it substantially in how it is built.
 
 What is shared with audioprism is the idea and some of the vocabulary: a live
-scrolling spectrogram, the same window functions by name, and a heat colour
+scrolling spectrogram, the same window functions by name, and a heat color
 scheme that follows the same black-blue-green-yellow-red-white progression.
 
 What is not: the DFT and window functions come from
 [go-dsp](https://github.com/0magnet/go-dsp) rather than FFTW; there are six
-colour schemes here, three of them published perceptually uniform colormaps that
+color schemes here, three of them published perceptually uniform colormaps that
 audioprism does not have; and the whole of the rest of this -- five frontends
 (C.O.R.E., Fyne, gomobile, tcell and WebAssembly), audio over WebSocket and
 WebTransport, the offline PNG renderer and the CLI -- has no counterpart in it,
@@ -30,7 +30,7 @@ which is built on SDL2, FFTW and ImageMagick with a thread-per-stage design.
 
 Support for **pulseaudio** via  "[github.com/jfreymuth/pulse](https://github.com/jfreymuth/pulse)" library
 
-## Colour schemes
+## Color schemes
 
 `--colors` takes one of six.
 
@@ -43,7 +43,7 @@ Support for **pulseaudio** via  "[github.com/jfreymuth/pulse](https://github.com
 | `viridis` | matplotlib's viridis |
 | `magma` | matplotlib's magma |
 
-The first three are piecewise-linear ramps between corner colours. The last
+The first three are piecewise-linear ramps between corner colors. The last
 three are lookup tables from maps designed to be **perceptually uniform** --
 equal steps in magnitude look like equal steps in brightness, which a linear
 ramp does not manage, so they neither invent banding where the data is smooth
