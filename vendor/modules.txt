@@ -204,7 +204,7 @@ github.com/gdamore/tcell/v3/color
 github.com/gdamore/tcell/v3/internal/widthutil
 github.com/gdamore/tcell/v3/tty
 github.com/gdamore/tcell/v3/vt
-# github.com/gin-contrib/sse v1.1.1
+# github.com/gin-contrib/sse v1.1.2
 ## explicit; go 1.23
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.12.0
