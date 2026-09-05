@@ -65,6 +65,13 @@ type GlyphSVG struct {
 	// and several glyphs may share the same Source
 	Source []byte
 
+	// ViewBox is the initial viewport of the SVG document:
+	// the rectangle in SVG user space mapped to the em square
+	// when rendering.
+	// It is resolved from the root <svg> element attributes,
+	// defaulting to (0, 0, upem, upem) as required by the specification.
+	ViewBox SVGViewBox
+
 	// According to the specification, a fallback outline
 	// should be specified for each SVG glyphs
 	Outline GlyphOutline
@@ -179,7 +186,7 @@ func (bt bitmap) glyphData(gid gID, xPpem, yPpem uint16) (GlyphBitmap, error) {
 	return out, nil
 }
 
-func (s svg) glyphData(gid gID) (GlyphSVG, bool) {
+func (s svg) glyphData(gid gID, upem uint16) (GlyphSVG, bool) {
 	data, ok := s.rawGlyphData(gid)
 	if !ok {
 		return GlyphSVG{}, false
@@ -193,7 +200,7 @@ func (s svg) glyphData(gid gID) (GlyphSVG, bool) {
 		}
 	}
 
-	return GlyphSVG{Source: data}, true
+	return GlyphSVG{Source: data, ViewBox: svgViewBox(data, upem)}, true
 }
 
 // this file converts from font format for glyph outlines to
@@ -447,7 +454,7 @@ func (f *Face) GlyphDataOutline(gid GID) (GlyphOutline, bool) {
 
 // GlyphDataSVG looks for glyph data in the 'SVG ' table.
 func (f *Face) GlyphDataSVG(gid GID) (GlyphSVG, bool) {
-	outS, ok := f.svg.glyphData(gID(gid))
+	outS, ok := f.svg.glyphData(gID(gid), f.upem)
 	if !ok {
 		return GlyphSVG{}, false
 	}

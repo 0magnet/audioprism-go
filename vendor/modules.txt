@@ -55,13 +55,13 @@ fyne.io/fyne/v2/widget
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/0magnet/calvin v0.0.0-20260903022122-1518a55e53f3
+# github.com/0magnet/calvin v0.0.0-20260904172612-288ced851c19
 ## explicit; go 1.25.0
 github.com/0magnet/calvin
 # github.com/0magnet/coloredcobra v1.0.2
 ## explicit; go 1.15
 github.com/0magnet/coloredcobra
-# github.com/0magnet/go-dsp v0.0.0-20260903022315-ff0b2ff9a93d
+# github.com/0magnet/go-dsp v0.0.0-20260904172328-4474a45054c8
 ## explicit; go 1.23.0
 github.com/0magnet/go-dsp/dsputils
 github.com/0magnet/go-dsp/fft
@@ -157,13 +157,12 @@ github.com/ebitengine/gomobile/internal/mobileinit
 # github.com/ebitengine/hideconsole v1.0.0
 ## explicit; go 1.18
 github.com/ebitengine/hideconsole
-# github.com/ebitengine/purego v0.10.2
-## explicit; go 1.18
+# github.com/ebitengine/purego v0.11.0
+## explicit; go 1.25.0
 github.com/ebitengine/purego
 github.com/ebitengine/purego/internal/cgo
 github.com/ebitengine/purego/internal/fakecgo
 github.com/ebitengine/purego/internal/strings
-github.com/ebitengine/purego/internal/xreflect
 github.com/ebitengine/purego/objc
 # github.com/fatih/color v1.19.0
 ## explicit; go 1.25.0
@@ -239,14 +238,15 @@ github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.18.1
 ## explicit; go 1.18
 github.com/go-playground/universal-translator
-# github.com/go-playground/validator/v10 v10.30.3
+# github.com/go-playground/validator/v10 v10.30.4
 ## explicit; go 1.25.0
 github.com/go-playground/validator/v10
 # github.com/go-text/render v0.2.1
 ## explicit; go 1.19
 github.com/go-text/render
-# github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec
+# github.com/go-text/typesetting v0.3.5
 ## explicit; go 1.19
+github.com/go-text/typesetting/bidi
 github.com/go-text/typesetting/di
 github.com/go-text/typesetting/font
 github.com/go-text/typesetting/font/cff
@@ -295,7 +295,7 @@ github.com/hack-pad/go-indexeddb/idb/internal/jscache
 github.com/hack-pad/safejs
 github.com/hack-pad/safejs/internal/catch
 github.com/hack-pad/safejs/internal/stackerr
-# github.com/hajimehoshi/ebiten/v2 v2.9.10
+# github.com/hajimehoshi/ebiten/v2 v2.9.11
 ## explicit; go 1.25.0
 github.com/hajimehoshi/ebiten/v2
 github.com/hajimehoshi/ebiten/v2/ebitenutil
@@ -382,7 +382,7 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.24
 ## explicit; go 1.20
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.28
+# github.com/mattn/go-runewidth v0.0.29
 ## explicit; go 1.23
 github.com/mattn/go-runewidth
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
@@ -409,8 +409,8 @@ github.com/pelletier/go-toml/v2/unstable
 # github.com/quic-go/qpack v0.6.0
 ## explicit; go 1.24
 github.com/quic-go/qpack
-# github.com/quic-go/quic-go v0.61.0
-## explicit; go 1.25.0
+# github.com/quic-go/quic-go v0.62.0
+## explicit; go 1.26.0
 github.com/quic-go/quic-go
 github.com/quic-go/quic-go/http3
 github.com/quic-go/quic-go/http3/qlog
@@ -422,14 +422,15 @@ github.com/quic-go/quic-go/internal/protocol
 github.com/quic-go/quic-go/internal/qerr
 github.com/quic-go/quic-go/internal/utils
 github.com/quic-go/quic-go/internal/utils/linkedlist
+github.com/quic-go/quic-go/internal/utils/minheap
 github.com/quic-go/quic-go/internal/utils/ringbuffer
 github.com/quic-go/quic-go/internal/wire
 github.com/quic-go/quic-go/qlog
 github.com/quic-go/quic-go/qlogwriter
 github.com/quic-go/quic-go/qlogwriter/jsontext
 github.com/quic-go/quic-go/quicvarint
-# github.com/quic-go/webtransport-go v0.12.0
-## explicit; go 1.25.0
+# github.com/quic-go/webtransport-go v0.13.0
+## explicit; go 1.26.0
 github.com/quic-go/webtransport-go
 # github.com/rymdport/portal v0.4.2
 ## explicit; go 1.19
@@ -480,7 +481,7 @@ github.com/twitchyliquid64/golang-asm/unsafeheader
 # github.com/ugorji/go/codec v1.3.2
 ## explicit; go 1.21
 github.com/ugorji/go/codec
-# github.com/yuin/goldmark v1.8.5
+# github.com/yuin/goldmark v1.8.6
 ## explicit; go 1.22
 github.com/yuin/goldmark
 github.com/yuin/goldmark/ast
@@ -491,8 +492,8 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# go.mongodb.org/mongo-driver/v2 v2.8.1
-## explicit; go 1.19
+# go.mongodb.org/mongo-driver/v2 v2.9.0
+## explicit; go 1.25.0
 go.mongodb.org/mongo-driver/v2/bson
 go.mongodb.org/mongo-driver/v2/internal/binaryutil
 go.mongodb.org/mongo-driver/v2/internal/bsoncoreutil
@@ -504,8 +505,8 @@ go.yaml.in/yaml/v3
 # golang.org/x/arch v0.30.0
 ## explicit; go 1.25.0
 golang.org/x/arch/x86/x86asm
-# golang.org/x/crypto v0.55.0
-## explicit; go 1.25.0
+# golang.org/x/crypto v0.56.0
+## explicit; go 1.26.0
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
@@ -616,8 +617,8 @@ google.golang.org/protobuf/proto
 google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
-# mvdan.cc/sh/v3 v3.13.1
-## explicit; go 1.25.0
+# mvdan.cc/sh/v3 v3.14.0
+## explicit; go 1.26.0
 mvdan.cc/sh/v3/expand
 mvdan.cc/sh/v3/fileutil
 mvdan.cc/sh/v3/internal

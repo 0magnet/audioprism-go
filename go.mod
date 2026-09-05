@@ -4,16 +4,16 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/0magnet/calvin v0.0.0-20260903022122-1518a55e53f3
+	github.com/0magnet/calvin v0.0.0-20260904172612-288ced851c19
 	github.com/0magnet/coloredcobra v1.0.2
-	github.com/0magnet/go-dsp v0.0.0-20260903022315-ff0b2ff9a93d
+	github.com/0magnet/go-dsp v0.0.0-20260904172328-4474a45054c8
 	github.com/bitfield/script v0.25.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
-	github.com/hajimehoshi/ebiten/v2 v2.9.10
+	github.com/hajimehoshi/ebiten/v2 v2.9.11
 	github.com/jfreymuth/pulse v0.1.3
-	github.com/quic-go/quic-go v0.61.0
-	github.com/quic-go/webtransport-go v0.12.0
+	github.com/quic-go/quic-go v0.62.0
+	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/mobile v0.0.0-20260821190718-4776eadac327
 	golang.org/x/net v0.58.0
@@ -34,7 +34,7 @@ require (
 	github.com/dunglas/httpsfv v1.1.1 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
-	github.com/ebitengine/purego v0.10.2 // indirect
+	github.com/ebitengine/purego v0.11.0 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect
@@ -48,9 +48,9 @@ require (
 	github.com/go-gl/gl v0.0.0-20260331235117-4566fea9a276 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.30.3 // indirect
+	github.com/go-playground/validator/v10 v10.30.4 // indirect
 	github.com/go-text/render v0.2.1 // indirect
-	github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec // indirect
+	github.com/go-text/typesetting v0.3.5 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
-	github.com/mattn/go-runewidth v0.0.28 // indirect
+	github.com/mattn/go-runewidth v0.0.29 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
@@ -82,11 +82,11 @@ require (
 	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.2 // indirect
-	github.com/yuin/goldmark v1.8.5 // indirect
-	go.mongodb.org/mongo-driver/v2 v2.8.1 // indirect
+	github.com/yuin/goldmark v1.8.6 // indirect
+	go.mongodb.org/mongo-driver/v2 v2.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.30.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20260824195058-e88cd73687aa // indirect
 	golang.org/x/image v0.45.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
@@ -94,7 +94,7 @@ require (
 	golang.org/x/term v0.45.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
-	mvdan.cc/sh/v3 v3.13.1 // indirect
+	mvdan.cc/sh/v3 v3.14.0 // indirect
 )
 
 exclude github.com/mjibson/go-dsp v1.0.0
