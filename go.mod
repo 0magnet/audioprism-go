@@ -4,10 +4,10 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/0magnet/calvin v0.0.0-20260904172612-288ced851c19
-	github.com/0magnet/coloredcobra v1.0.2
-	github.com/0magnet/go-dsp v0.0.0-20260904172328-4474a45054c8
-	github.com/bitfield/script v0.25.0
+	github.com/0magnet/calvin v0.0.0-20260905171945-6d046e156c9b
+	github.com/0magnet/coloredcobra v1.0.3
+	github.com/0magnet/go-dsp v0.0.0-20260905172003-9e5bb50ba887
+	github.com/bitfield/script v0.25.1
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
 	github.com/hajimehoshi/ebiten/v2 v2.9.11
@@ -24,7 +24,7 @@ require github.com/clipperhouse/displaywidth v0.11.0 // indirect
 require (
 	fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
-	github.com/anthonynsimon/bild v0.17.0 // indirect
+	github.com/anthonynsimon/bild v0.17.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.3 // indirect
 	github.com/bytedance/sonic/loader v0.5.2 // indirect
@@ -94,7 +94,7 @@ require (
 	golang.org/x/term v0.45.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
-	mvdan.cc/sh/v3 v3.14.0 // indirect
+	mvdan.cc/sh/v3 v3.14.1 // indirect
 )
 
 exclude github.com/mjibson/go-dsp v1.0.0
