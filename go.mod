@@ -4,13 +4,13 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/0magnet/calvin v0.0.0-20260907164811-60c88e364a88
+	github.com/0magnet/calvin v0.0.0-20260908144219-7385103470d9
 	github.com/0magnet/coloredcobra v1.0.3
-	github.com/0magnet/go-dsp v0.0.0-20260905172003-9e5bb50ba887
+	github.com/0magnet/go-dsp v0.0.0-20260907230215-136ba239cc2d
 	github.com/bitfield/script v0.25.1
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
-	github.com/hajimehoshi/ebiten/v2 v2.9.11
+	github.com/hajimehoshi/ebiten/v2 v2.10.0
 	github.com/jfreymuth/pulse v0.1.3
 	github.com/quic-go/quic-go v0.62.0
 	github.com/quic-go/webtransport-go v0.13.0
@@ -60,7 +60,6 @@ require (
 	github.com/itchyny/gojq v0.12.19 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade // indirect
-	github.com/jezek/xgb v1.3.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
@@ -85,14 +84,14 @@ require (
 	github.com/yuin/goldmark v1.8.6 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/arch v0.30.0 // indirect
+	golang.org/x/arch v0.31.0 // indirect
 	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20260824195058-e88cd73687aa // indirect
 	golang.org/x/image v0.45.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	mvdan.cc/sh/v3 v3.14.1 // indirect
 )
