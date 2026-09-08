@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/0magnet/calvin v0.0.0-20260908144219-7385103470d9
+	github.com/0magnet/calvin v0.0.0-20260908180241-0893f4bff56a
 	github.com/0magnet/coloredcobra v1.0.3
 	github.com/0magnet/go-dsp v0.0.0-20260907230215-136ba239cc2d
 	github.com/bitfield/script v0.25.1
@@ -85,9 +85,9 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.31.0 // indirect
-	golang.org/x/crypto v0.56.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20260824195058-e88cd73687aa // indirect
-	golang.org/x/image v0.45.0 // indirect
+	golang.org/x/image v0.46.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/term v0.46.0 // indirect

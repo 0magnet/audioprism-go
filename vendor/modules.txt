@@ -55,8 +55,8 @@ fyne.io/fyne/v2/widget
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/0magnet/calvin v0.0.0-20260908144219-7385103470d9
-## explicit; go 1.25.0
+# github.com/0magnet/calvin v0.0.0-20260908180241-0893f4bff56a
+## explicit; go 1.26.0
 github.com/0magnet/calvin
 # github.com/0magnet/coloredcobra v1.0.3
 ## explicit; go 1.25.0
@@ -510,7 +510,7 @@ go.yaml.in/yaml/v3
 # golang.org/x/arch v0.31.0
 ## explicit; go 1.26.0
 golang.org/x/arch/x86/x86asm
-# golang.org/x/crypto v0.56.0
+# golang.org/x/crypto v0.57.0
 ## explicit; go 1.26.0
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/chacha20poly1305
@@ -527,8 +527,8 @@ golang.org/x/exp/shiny/driver/internal/lifecycler
 golang.org/x/exp/shiny/driver/internal/win32
 golang.org/x/exp/shiny/driver/internal/x11key
 golang.org/x/exp/shiny/screen
-# golang.org/x/image v0.45.0
-## explicit; go 1.25.0
+# golang.org/x/image v0.46.0
+## explicit; go 1.26.0
 golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
