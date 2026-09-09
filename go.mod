@@ -15,8 +15,8 @@ require (
 	github.com/quic-go/quic-go v0.62.0
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/mobile v0.0.0-20260821190718-4776eadac327
-	golang.org/x/net v0.58.0
+	golang.org/x/mobile v0.0.0-20260908204917-8b95e45f8d3e
+	golang.org/x/net v0.59.0
 )
 
 require github.com/clipperhouse/displaywidth v0.11.0 // indirect
@@ -86,7 +86,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.31.0 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp/shiny v0.0.0-20260824195058-e88cd73687aa // indirect
+	golang.org/x/exp/shiny v0.0.0-20260908205506-85c1c2202aba // indirect
 	golang.org/x/image v0.46.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
