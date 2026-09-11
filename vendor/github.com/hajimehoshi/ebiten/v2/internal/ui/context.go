@@ -85,6 +85,9 @@ type context struct {
 
 	skipCount int
 
+	// presentationSkipped keeps a redraw pending until an ordinary frame can be presented.
+	presentationSkipped bool
+
 	funcsInFrameCh chan func()
 }
 
@@ -98,16 +101,26 @@ func newContext(game Game, screenTransparent bool) *context {
 
 // updateFrame runs one frame. present reports whether the frame should be shown on the screen; when it
 // is false (e.g. the window is hidden) the buffer swap is skipped, so the loop paces from
-// swapBuffersOrWait's no-swap path instead of a present that may block, and Update keeps running at the
+// flushCommandsAndWait's no-swap path instead of a present that may block, and Update keeps running at the
 // target tick rate.
 func (c *context) updateFrame(graphicsDriver graphicsdriver.Graphics, outsideWidth, outsideHeight float64, screenWidth, screenHeight int, deviceScaleFactor float64, ui *UserInterface, present bool) error {
+	if !present {
+		c.presentationSkipped = true
+	} else if c.presentationSkipped {
+		// The offscreen may have changed while buffer swaps were suppressed.
+		// Reset draw skipping so that its current content reaches the window.
+		c.skipCount = 0
+	}
 	// TODO: If updateCount is 0 and vsync is disabled, swapping buffers can be skipped.
 	needsSwapBuffers, err := c.updateFrameImpl(graphicsDriver, clock.UpdateFrame(), outsideWidth, outsideHeight, screenWidth, screenHeight, deviceScaleFactor, ui, false)
 	if err != nil {
 		return err
 	}
-	if err := c.swapBuffersOrWait(needsSwapBuffers && present, graphicsDriver, ui.FPSMode() == FPSModeVsyncOn, ui.RefreshRate()); err != nil {
+	if err := c.flushCommandsAndWait(needsSwapBuffers && present, graphicsDriver, ui.FPSMode() == FPSModeVsyncOn, ui.RefreshRate()); err != nil {
 		return err
+	}
+	if needsSwapBuffers && present {
+		c.presentationSkipped = false
 	}
 	return nil
 }
@@ -129,7 +142,7 @@ func (c *context) forceUpdateFrame(graphicsDriver graphicsdriver.Graphics, outsi
 		if err != nil {
 			return err
 		}
-		if err := c.swapBuffersOrWait(needsSwapBuffers, graphicsDriver, ui.FPSMode() == FPSModeVsyncOn, ui.RefreshRate()); err != nil {
+		if err := c.flushCommandsAndWait(needsSwapBuffers, graphicsDriver, ui.FPSMode() == FPSModeVsyncOn, ui.RefreshRate()); err != nil {
 			return err
 		}
 	}
@@ -246,11 +259,9 @@ func (c *context) readInputStateForTick(ui *UserInterface) {
 	ui.advanceInputTimeToNextTick()
 }
 
-func (c *context) swapBuffersOrWait(needsSwapBuffers bool, graphicsDriver graphicsdriver.Graphics, vsyncEnabled bool, refreshRate int) error {
-	if needsSwapBuffers {
-		if err := atlas.SwapBuffers(graphicsDriver); err != nil {
-			return err
-		}
+func (c *context) flushCommandsAndWait(needsSwapBuffers bool, graphicsDriver graphicsdriver.Graphics, vsyncEnabled bool, refreshRate int) error {
+	if err := atlas.FlushCommands(graphicsDriver, needsSwapBuffers); err != nil {
+		return err
 	}
 
 	// Swapping buffers for an invisible screen returns without waiting for the display. Pace such a

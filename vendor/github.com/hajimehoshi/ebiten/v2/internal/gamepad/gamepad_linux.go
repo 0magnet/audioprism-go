@@ -275,6 +275,10 @@ func (g *nativeGamepadsImpl) update(gamepads *gamepads) error {
 			Cookie: uint32(buf[8]) | uint32(buf[9])<<8 | uint32(buf[10])<<16 | uint32(buf[11])<<24,
 			Len:    uint32(buf[12]) | uint32(buf[13])<<8 | uint32(buf[14])<<16 | uint32(buf[15])<<24,
 		}
+		if e.Len == 0 {
+			buf = buf[16:]
+			continue
+		}
 		name := unix.ByteSliceToString(buf[16 : 16+e.Len-1]) // len includes the null terminate.
 		buf = buf[16+e.Len:]
 		if !reEvent.MatchString(name) {
@@ -370,18 +374,20 @@ func (g *nativeGamepadImpl) update(gamepad *gamepads) error {
 			value: int32(buf[offsetValue]) | int32(buf[offsetValue+1])<<8 | int32(buf[offsetValue+2])<<16 | int32(buf[offsetValue+3])<<24,
 		}
 
-		if e.typ == unix.EV_SYN {
-			switch e.code {
-			case _SYN_DROPPED:
-				g.dropped = true
-			case _SYN_REPORT:
-				g.dropped = false
+		if e.typ == unix.EV_SYN && e.code == _SYN_DROPPED {
+			g.dropped = true
+		}
+		if g.dropped {
+			// Ignore events through the next SYN_REPORT, then restore the device state.
+			if e.typ == unix.EV_SYN && e.code == _SYN_REPORT {
 				if err := g.pollAbsState(); err != nil {
 					return fmt.Errorf("gamepad: poll absolute state: %w", err)
 				}
+				if err := g.pollKeyState(); err != nil {
+					return fmt.Errorf("gamepad: poll key state: %w", err)
+				}
+				g.dropped = false
 			}
-		}
-		if g.dropped {
 			continue
 		}
 
@@ -396,6 +402,19 @@ func (g *nativeGamepadImpl) update(gamepad *gamepads) error {
 			}
 		case unix.EV_ABS:
 			g.handleAbsEvent(int(e.code), e.value)
+		}
+	}
+	return nil
+}
+
+func (g *nativeGamepadImpl) pollKeyState() error {
+	var keyBits [(_KEY_CNT + 7) / 8]byte
+	if err := ioctl(g.fd, _EVIOCGKEY(uint(len(keyBits))), unsafe.Pointer(&keyBits[0])); err != nil {
+		return fmt.Errorf("gamepad: ioctl for keys at pollKeyState failed: %w", err)
+	}
+	for code, index := range g.keyMap {
+		if index >= 0 {
+			g.buttons[index] = isBitSet(keyBits[:], code+_BTN_MISC)
 		}
 	}
 	return nil
