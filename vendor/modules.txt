@@ -139,7 +139,7 @@ github.com/cloudwego/base64x/internal/native/sse
 github.com/cloudwego/base64x/internal/rt
 # github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 ## explicit
-# github.com/dunglas/httpsfv v1.1.1
+# github.com/dunglas/httpsfv v1.1.2
 ## explicit; go 1.14
 github.com/dunglas/httpsfv
 # github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6

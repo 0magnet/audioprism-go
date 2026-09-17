@@ -31,7 +31,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dunglas/httpsfv v1.1.1 // indirect
+	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.11.0 // indirect
