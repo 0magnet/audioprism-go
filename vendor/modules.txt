@@ -157,7 +157,7 @@ github.com/ebitengine/gomobile/internal/mobileinit
 # github.com/ebitengine/hideconsole v1.0.0
 ## explicit; go 1.18
 github.com/ebitengine/hideconsole
-# github.com/ebitengine/purego v0.11.0
+# github.com/ebitengine/purego v0.11.1
 ## explicit; go 1.25.0
 github.com/ebitengine/purego
 github.com/ebitengine/purego/cstrings
@@ -414,7 +414,7 @@ github.com/pelletier/go-toml/v2/unstable
 # github.com/quic-go/qpack v0.6.0
 ## explicit; go 1.24
 github.com/quic-go/qpack
-# github.com/quic-go/quic-go v0.62.0
+# github.com/quic-go/quic-go v0.63.0
 ## explicit; go 1.26.0
 github.com/quic-go/quic-go
 github.com/quic-go/quic-go/http3

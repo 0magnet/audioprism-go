@@ -12,7 +12,7 @@ require (
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
 	github.com/hajimehoshi/ebiten/v2 v2.10.2
 	github.com/jfreymuth/pulse v0.1.3
-	github.com/quic-go/quic-go v0.62.0
+	github.com/quic-go/quic-go v0.63.0
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/mobile v0.0.0-20260908204917-8b95e45f8d3e
@@ -34,7 +34,7 @@ require (
 	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
-	github.com/ebitengine/purego v0.11.0 // indirect
+	github.com/ebitengine/purego v0.11.1 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect
