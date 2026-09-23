@@ -296,7 +296,7 @@ github.com/hack-pad/go-indexeddb/idb/internal/jscache
 github.com/hack-pad/safejs
 github.com/hack-pad/safejs/internal/catch
 github.com/hack-pad/safejs/internal/stackerr
-# github.com/hajimehoshi/ebiten/v2 v2.10.2
+# github.com/hajimehoshi/ebiten/v2 v2.10.3
 ## explicit; go 1.25.0
 github.com/hajimehoshi/ebiten/v2
 github.com/hajimehoshi/ebiten/v2/ebitenutil

@@ -10,7 +10,7 @@ require (
 	github.com/bitfield/script v0.25.1
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
-	github.com/hajimehoshi/ebiten/v2 v2.10.2
+	github.com/hajimehoshi/ebiten/v2 v2.10.3
 	github.com/jfreymuth/pulse v0.1.3
 	github.com/quic-go/quic-go v0.63.0
 	github.com/quic-go/webtransport-go v0.13.0
