@@ -232,7 +232,7 @@ github.com/go-gl/glfw/v3.4/glfw/glfw/deps/wayland
 github.com/go-gl/glfw/v3.4/glfw/glfw/include
 github.com/go-gl/glfw/v3.4/glfw/glfw/include/GLFW
 github.com/go-gl/glfw/v3.4/glfw/glfw/src
-# github.com/go-playground/locales v0.14.1
+# github.com/go-playground/locales v0.14.2
 ## explicit; go 1.17
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
@@ -260,7 +260,7 @@ github.com/go-text/typesetting/internal/unicodedata
 github.com/go-text/typesetting/language
 github.com/go-text/typesetting/segmenter
 github.com/go-text/typesetting/shaping
-# github.com/goccy/go-json v0.11.0
+# github.com/goccy/go-json v0.11.1
 ## explicit; go 1.21
 github.com/goccy/go-json
 github.com/goccy/go-json/internal/decoder
