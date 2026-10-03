@@ -7,6 +7,7 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"os"
 )
 
@@ -23,7 +24,12 @@ func main() {
 	x, y, z := 1.0, 1.0, 1.0
 
 	w := bufio.NewWriter(os.Stdout)
-	defer w.Flush()
+	put := func(v float64) {
+		if err := binary.Write(w, binary.LittleEndian, float32(clamp(v))); err != nil {
+			fmt.Fprintln(os.Stderr, "lorenz:", err) //nolint:errcheck
+			os.Exit(1)
+		}
+	}
 
 	n := 0
 	for i := 0; i < samples*skip; i++ {
@@ -36,11 +42,15 @@ func main() {
 		if i%skip != 0 {
 			continue
 		}
-		binary.Write(w, binary.LittleEndian, float32(clamp(x*xScale)))
-		binary.Write(w, binary.LittleEndian, float32(clamp(y*yScale)))
+		put(x * xScale)
+		put(y * yScale)
 		if n++; n >= samples {
 			break
 		}
+	}
+	if err := w.Flush(); err != nil {
+		fmt.Fprintln(os.Stderr, "lorenz:", err) //nolint:errcheck
+		os.Exit(1)
 	}
 }
 
