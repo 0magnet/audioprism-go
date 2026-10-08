@@ -76,7 +76,7 @@ github.com/anthonynsimon/bild/blur
 github.com/anthonynsimon/bild/clone
 github.com/anthonynsimon/bild/convolution
 github.com/anthonynsimon/bild/parallel
-# github.com/bitfield/script v0.25.1
+# github.com/bitfield/script v0.25.2
 ## explicit; go 1.25.0
 github.com/bitfield/script
 # github.com/bytedance/gopkg v0.1.4
@@ -388,7 +388,7 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.24
 ## explicit; go 1.20
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.30
+# github.com/mattn/go-runewidth v0.0.31
 ## explicit; go 1.23
 github.com/mattn/go-runewidth
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
@@ -518,7 +518,7 @@ golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
-# golang.org/x/exp/shiny v0.0.0-20261005173118-76772065c9b0
+# golang.org/x/exp/shiny v0.0.0-20261007192929-f45ad48fbe92
 ## explicit; go 1.26.0
 golang.org/x/exp/shiny/driver/gldriver
 golang.org/x/exp/shiny/driver/internal/drawer
