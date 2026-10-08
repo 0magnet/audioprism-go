@@ -48,10 +48,9 @@ Use the test scripts to generate various patterns:
 
 The XY scope is fully integrated as a subcommand alongside the other visualization modes:
 
-- `c` - C.O.R.E. desktop GUI
-- `d` - C.O.R.E. web UI  
 - `f` - Fyne GUI
 - `m` - Gomobile GUI
+- `p` - PNG spectrogram of a WAV file
 - `t` - Tcell TUI
 - `w` - WASM
 - `xy` - X-Y Oscilloscope (this)
@@ -70,4 +69,4 @@ Without this, the pulse library defaults to mono recording, causing all patterns
 
 ### Why Fyne?
 
-Initially implemented with Ebiten, but Ebiten uses GLFW which conflicts with other GUI frameworks (Fyne, Cogentcore) already in use by audioprism-go. Fyne implementation allows all subcommands to coexist in a single binary.
+Initially implemented with Ebiten, but Ebiten uses GLFW which conflicts with Fyne, which audioprism-go already uses. Fyne implementation allows all subcommands to coexist in a single binary.
