@@ -4,9 +4,9 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/0magnet/calvin v0.0.0
+	github.com/0magnet/calvin v0.0.1-0.20261004205601-db77b5906bf6
 	github.com/0magnet/coloredcobra v1.0.3
-	github.com/0magnet/go-dsp v0.0.0
+	github.com/0magnet/go-dsp v0.0.1-0.20261004205004-01fc64b17317
 	github.com/bitfield/script v0.25.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
