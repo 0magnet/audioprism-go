@@ -14,21 +14,57 @@ scheme that follows the same black-blue-green-yellow-red-white progression.
 What is not: the DFT and window functions come from
 [go-dsp](https://github.com/0magnet/go-dsp) rather than FFTW; there are six
 color schemes here, three of them published perceptually uniform colormaps that
-audioprism does not have; and the whole of the rest of this -- five frontends
-(C.O.R.E., Fyne, gomobile, tcell and WebAssembly), audio over WebSocket and
+audioprism does not have; and the whole of the rest of this -- four live frontends
+(Fyne, gomobile, tcell and WebAssembly), audio over WebSocket and
 WebTransport, the offline PNG renderer and the CLI -- has no counterpart in it,
 which is built on SDL2, FFTW and ImageMagick with a thread-per-stage design.
 
 ## Frontends
 
-* [Fyne](https://github.com/fyne-io/fyne)
-* [Go mobile](https://pkg.go.dev/golang.org/x/mobile)
-* [Tcell](github.com/gdamore/tcell)
-* Web Assembly WASM (web)
+Each is a subcommand of the root command. The live ones take the same spectrogram
+flags (`--colors`, `--window`, `--magnitude-scale`, `--magnitude-min`,
+`--magnitude-max`, `--dft-size`, `--overlap`), plus `-x/--width` and
+`-y/--height` (640x480 by default), `-u/--up` for the frame rate, `-b/--buf` for
+the audio buffer and `-s/--fps` to show the rate.
+
+| command | frontend |
+|---|---|
+| `f` | [Fyne](https://github.com/fyne-io/fyne) |
+| `t` | [Tcell](https://github.com/gdamore/tcell), in the terminal |
+| `w` | WebAssembly: serves a page that draws the spectrogram in the browser |
+| `m` | [Go mobile](https://pkg.go.dev/golang.org/x/mobile); needs cgo, so it is absent from builds without it |
+| `p` | not live: `p <WAV in> <image out>` renders a WAV file to a PNG or JPEG |
+| `xy` | an X-Y oscilloscope for stereo audio, described in [cmd/xy/README.md](cmd/xy/README.md) |
+
+`f`, `t` and `m` take `-k/--websocket` to read audio from a WebSocket URL, such
+as the one `w` serves, instead of the local sound server.
+
+`w` serves on port 8080 by default (`-p/--port`, `--bind` to limit the
+address). `--dev` and `--tinygo` compile the wasm from source (`--wpath` names
+it, `cmd/a/wasm/wasm/b.go` by default) instead of using the embedded build, and
+are offered only when `go` or `tinygo` is on the path; `-x` and `-y` set the
+display size at that compilation. `--wt`, `--wt-port` and `--wt-path` control
+the WebTransport endpoint, and `-s/--fps` shows the frame rate in the page.
+
+`p` takes `--orientation` (horizontal or vertical) and `--quality` for JPEG
+output, and spells the magnitude scale `logarithmic` where the live frontends
+spell it `log`.
+
+`cmd/lorenz` is a signal generator rather than a frontend: it writes a Lorenz
+attractor as 48 kHz 32-bit float stereo PCM to stdout, to be piped into
+ffmpeg and watched in `xy` (see `test2.sh`).
 
 ## Audio Source
 
-Support for **pulseaudio** via  "[github.com/jfreymuth/pulse](https://github.com/jfreymuth/pulse)" library
+By default the live frontends and `w` capture from the sound server through
+PulseAudio (PipeWire's compatible server works) using
+"[github.com/jfreymuth/pulse](https://github.com/jfreymuth/pulse)".
+
+`w` has two other sources. `-D/--dir DIR` streams the audio files in a directory,
+decoded and resampled by ffmpeg, instead of capturing; `-S/--shuffle` shuffles
+that playlist. And whichever source is in use, `w` sends the audio to the page
+over a WebSocket, which is the default, or over WebTransport (HTTP/3 over QUIC,
+on UDP) when the page is opened with `?audio=wt`.
 
 ## Color schemes
 
@@ -83,166 +119,36 @@ ffmpeg -f lavfi -i "aevalsrc=sin(2*PI*100*exp(t/2)*t):d=10" -f pulse default
 
 ## Help Menus
 
-```
-$ go run github.com/0magnet/audioprism-go@master
-audioprism-go
-┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
-├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
-┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-Audio Spectrogram Visualization
-v0.0.0-20251029125916-f0f764bde1c6
-built with go1.25.3 X:nodwarf5
-
-Usage:
-  audioprism-go
-
-Available Commands:
-  c         with core
-  d         with CORE web UI via websockets
-  f         with fyne
-  m         with gomobile
-  t         with tcell
-  w         with wasm via websockets
-
-Flags:
-  -b, --bv     print runtime/debug.BuildInfo.Main.Version
-  -d, --info   print runtime/debug.BuildInfo
+Output of `go run . --help` and of `--help` on each subcommand:
 
 ```
-
-```
-go run cmd/fyne/fyne.go --help
-┌─┐┬ ┬┌┐┌┌─┐
-├┤ └┬┘│││├┤
-└   ┴ ┘└┘└─┘
-Audio Spectrogram Visualization with fyne
-
-Usage:
-  fyne
-
-
-
-Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run cmd/gomobile/gomobile.go --help
-┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
-│ ┬│ │││││ │├┴┐││  ├┤
-└─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
-Audio Spectrogram Visualization with gomobile
-
-Usage:
-  gomobile
-
-
-
-Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run cmd/tcell/tcell.go --help
-┌┬┐┌─┐┌─┐┬  ┬  
- │ │  ├┤ │  │  
- ┴ └─┘└─┘┴─┘┴─┘
-Audio Spectrogram Visualization with tcell
-
-Usage:
-  tcell
-
-
-
-Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run cmd/wasm/wasm.go --help
-
-	┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
-	├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
-	┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
-	Audio Spectrogram Visualization in Webassembly
-
-Usage:
-  wasm
-
-Available Commands:
-
-Flags:
-  -d, --dev            compile wasm from source
-  -y, --height int     height of spectrogram display - set on wasm compilation (default 512)
-  -p, --port int       port to serve on (default 8080)
-  -t, --tinygo         compile wasm from source with tinygo
-  -x, --width int      width of spectrogram display - set on wasm compilation (default 512)
-  -w, --wpath string   path to wasm source in dev mode (default "cmd/wasm/wasm/b.go")
-go run . --help
+$ go run . --help
 audioprism-go
 ┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
 ├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
 ┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
 Audio Spectrogram Visualization
 (devel)
-built with go1.25.3 X:nodwarf5
+built with go1.27.1-X:nodwarf5
 
 Usage:
   audioprism-go
 
 Available Commands:
-  c         with core
-  d         with CORE web UI via websockets
-  f         with fyne
-  m         with gomobile
-  t         with tcell
-  w         with wasm via websockets
+  f                          with fyne
+  m                          with gomobile
+  p                          render a WAV file to a spectrogram image
+  t                          with tcell
+  w                          with wasm via websockets
+  xy                         X-Y Audio scope
 
 Flags:
   -b, --bv     print runtime/debug.BuildInfo.Main.Version
   -d, --info   print runtime/debug.BuildInfo
-go run . c --help
-┌─┐ ┌─┐ ┬─┐ ┌─┐
-│   │ │ ├┬┘ ├┤  
-└─┘o└─┘o┴└─o└─┘o
-Audio Spectrogram Visualization with C.O.R.E. GUI
 
-Usage:
-  audioprism-go c
-
-
-
-Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run . d --help
-┌─┐ ┌─┐ ┬─┐ ┌─┐   ┬ ┬┌─┐┌┐   ┬ ┬┬
-│   │ │ ├┬┘ ├┤    │││├┤ ├┴┐  │ ││
-└─┘o└─┘o┴└─o└─┘o  └┴┘└─┘└─┘  └─┘┴
-Audio Spectrogram Visualization with C.O.R.E. web GUI
-
-Usage:
-  audioprism-go d
-
-
-
-Flags:
-  -y, --height int   height of spectrogram display - set on wasm compilation (default 512)
-  -p, --port int     port to serve on (default 8080)
-  -x, --width int    width of spectrogram display - set on wasm compilation (default 512)
-go run . f --help
+$ go run . f --help
 ┌─┐┬ ┬┌┐┌┌─┐
-├┤ └┬┘│││├┤
+├┤ └┬┘│││├┤ 
 └   ┴ ┘└┘└─┘
 Audio Spectrogram Visualization with Fyne GUI
 
@@ -252,15 +158,23 @@ Usage:
 
 
 Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run . m --help
+  -b, --buf int                  size of audio buffer (default 32768)
+      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
+      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
+  -s, --fps                      show fps
+  -y, --height int               initial window height (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: log, linear (default "log")
+      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
+  -u, --up int                   fps rate - 0 unlimits (default 60)
+  -k, --websocket string         websocket url (i.e. 'ws://127.0.0.1:8080/ws')
+  -x, --width int                initial window width (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
+
+$ go run . m --help
 ┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
-│ ┬│ │││││ │├┴┐││  ├┤
+│ ┬│ │││││ │├┴┐││  ├┤ 
 └─┘└─┘┴ ┴└─┘└─┘┴┴─┘└─┘
 Audio Spectrogram Visualization with golang.org/x/mobile GUI
 
@@ -270,13 +184,21 @@ Usage:
 
 
 Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run . t --help
+  -b, --buf int                  size of audio buffer (default 32768)
+      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
+      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
+  -s, --fps                      show fps
+  -y, --height int               initial window height (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: log, linear (default "log")
+      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
+  -u, --up int                   fps rate - 0 unlimits (default 60)
+  -k, --websocket string         websocket url (i.e. 'ws://127.0.0.1:8080/ws')
+  -x, --width int                initial window width (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
+
+$ go run . t --help
 ┌┬┐┌─┐┌─┐┬  ┬  
  │ │  ├┤ │  │  
  ┴ └─┘└─┘┴─┘┴─┘
@@ -288,13 +210,21 @@ Usage:
 
 
 Flags:
-  -b, --buf int            size of audio buffer (default 32768)
-  -s, --fps                show fps
-  -y, --height int         initial window height (default 512)
-  -u, --up int             fps rate - 0 unlimits (default 60)
-  -k, --websocket string   websocket url (i.e. 'ws://127.0.0.1:8080/ws')
-  -x, --width int          initial window width (default 512)
-go run . w --help
+  -b, --buf int                  size of audio buffer (default 32768)
+      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
+      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
+  -s, --fps                      show fps
+  -y, --height int               initial window height (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: log, linear (default "log")
+      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
+  -u, --up int                   fps rate - 0 unlimits (default 60)
+  -k, --websocket string         websocket url (i.e. 'ws://127.0.0.1:8080/ws')
+  -x, --width int                initial window width (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
+
+$ go run . w --help
 ┬ ┬┌─┐┌─┐┌┬┐
 │││├─┤└─┐│││
 └┴┘┴ ┴└─┘┴ ┴
@@ -306,14 +236,56 @@ Usage:
 
 
 Flags:
-  -d, --dev            compile wasm from source
-  -y, --height int     height of spectrogram display - set on wasm compilation (default 512)
-  -p, --port int       port to serve on (default 8080)
-  -t, --tinygo         compile wasm from source with tinygo
-  -x, --width int      width of spectrogram display - set on wasm compilation (default 512)
-  -w, --wpath string   path to wasm source in dev mode (default "cmd/wasm/wasm/b.go")
+      --bind string      address to bind to; empty means every interface (e.g. 127.0.0.1 to serve only locally)
+  -d, --dev              compile wasm from source
+  -D, --dir string       stream audio files from this directory (via ffmpeg) instead of pulseaudio
+  -s, --fps              show fps in wasm display
+  -y, --height int       height of spectrogram display - set on wasm compilation (default 480)
+  -p, --port int         port to serve on (default 8080)
+  -S, --shuffle          shuffle the playlist (only with --dir)
+  -t, --tinygo           compile wasm from source with tinygo
+  -x, --width int        width of spectrogram display - set on wasm compilation (default 640)
+  -w, --wpath string     path to wasm source in dev mode (default "cmd/a/wasm/wasm/b.go")
+      --wt               also offer the audio over WebTransport (HTTP/3 over QUIC, UDP) for ?audio=wt; the WebSocket is unaffected and stays the default, and a WebTransport that fails to start is logged rather than fatal (default true)
+      --wt-path string   WebTransport endpoint path (default "/wt")
+      --wt-port int      UDP port for WebTransport (0 = the same number as --port; QUIC is UDP so the numbers can be shared, and sharing them keeps the browser's origin check happy)
+
+$ go run . p --help
+┌─┐┌┐┌┌─┐
+├─┘││││ ┬
+┴  ┘└┘└─┘
+Audio Spectrogram Visualization from a WAV file to an image file
+
+Usage:
+  audioprism-go p
+
+
+
+Flags:
+      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
+      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
+  -y, --height int               height of spectrogram (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: logarithmic, linear (default "logarithmic")
+      --orientation string       orientation: horizontal, vertical (default "vertical")
+      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
+      --quality int              JPEG quality, when the output is a .jpg (default 95)
+  -x, --width int                width of spectrogram (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
+
+$ go run . xy --help
+─┐ ┬┬ ┬
+┌┴┬┘└┬┘
+┴ └─ ┴ 
+X-Y Audio Oscilloscope
+
+Usage:
+  audioprism-go xy
+
 
 ```
+
 ## Dependency Graph
 
 Made with [goda](https://github.com/loov/goda):
@@ -338,15 +310,15 @@ gocloc --not-match-d='(vendor|node_modules|\.git)' .
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Go                              56            895           1784           7255
+Go                              56            895           1784           7265
 JavaScript                       1             61             36            478
-Markdown                         3            127              0            383
-Makefile                         1             21             52            107
+Markdown                         3            118              0            362
+Makefile                         1             21             52            111
 YAML                             1              0              7             98
 BASH                             4             22             38             83
 Bourne Shell                     1              8             16             30
-JSON                             2              0              0             28
+JSON                             2              0              0             21
 -------------------------------------------------------------------------------
-TOTAL                           69           1134           1933           8462
+TOTAL                           69           1125           1933           8448
 -------------------------------------------------------------------------------
 ```
