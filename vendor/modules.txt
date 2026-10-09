@@ -55,7 +55,7 @@ fyne.io/fyne/v2/widget
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/0magnet/calvin v0.0.1-0.20261004205601-db77b5906bf6
+# github.com/0magnet/calvin v0.0.1-0.20261008155441-86637b449fe0
 ## explicit; go 1.26.0
 github.com/0magnet/calvin
 # github.com/0magnet/coloredcobra v1.0.3
@@ -508,7 +508,7 @@ go.mongodb.org/mongo-driver/v2/x/bsonx/bsoncore
 # go.yaml.in/yaml/v3 v3.0.5
 ## explicit; go 1.16
 go.yaml.in/yaml/v3
-# golang.org/x/arch v0.31.0
+# golang.org/x/arch v0.32.0
 ## explicit; go 1.26.0
 golang.org/x/arch/x86/x86asm
 # golang.org/x/crypto v0.57.0
@@ -555,7 +555,7 @@ golang.org/x/mobile/exp/gl/glutil
 golang.org/x/mobile/geom
 golang.org/x/mobile/gl
 golang.org/x/mobile/internal/mobileinit
-# golang.org/x/net v0.59.0
+# golang.org/x/net v0.60.0
 ## explicit; go 1.26.0
 golang.org/x/net/bpf
 golang.org/x/net/html
@@ -573,7 +573,7 @@ golang.org/x/net/internal/socket
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/websocket
-# golang.org/x/sync v0.23.0
+# golang.org/x/sync v0.24.0
 ## explicit; go 1.26.0
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.48.0
