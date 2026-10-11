@@ -15,7 +15,7 @@ require (
 	github.com/quic-go/quic-go v0.63.0
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/mobile v0.0.0-20260908204917-8b95e45f8d3e
+	golang.org/x/mobile v0.0.0-20261011034528-197770444867
 	golang.org/x/net v0.61.0
 )
 
@@ -43,7 +43,7 @@ require (
 	github.com/fyne-io/oksvg v0.2.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
-	github.com/gdamore/tcell/v3 v3.5.0
+	github.com/gdamore/tcell/v3 v3.6.0
 	github.com/gin-contrib/sse v1.1.2 // indirect
 	github.com/go-gl/gl v0.0.0-20260331235117-4566fea9a276 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
@@ -86,7 +86,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.32.0 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/exp/shiny v0.0.0-20261009195045-ca0d7ba23607 // indirect
+	golang.org/x/exp/shiny v0.0.0-20261011100332-faecfb24eb49 // indirect
 	golang.org/x/image v0.47.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
