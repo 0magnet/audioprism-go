@@ -1,7 +1,7 @@
-// Package main gen.go
+// Package commands gen.go
 //
 // Code generation utilities for command wrappers
-package main
+package commands
 
 import (
 	"bytes"
@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//command wrapper generation
-//any directories in the specified path will have a .go file of the same name written into them with the rendered wrapper template
+//command generation
+//any directories in the specified path get a commands/root.go written from the rendered template
 //assumes that these dirs contain a 'commands' package / subdir
 
 var (
@@ -41,42 +41,12 @@ var genCmd = &cobra.Command{
 	Long:  "generating subcommands from template should only be attempted when run from source",
 	Run: func(_ *cobra.Command, _ []string) {
 
-		cmdTmpl, err := template.New("main").Parse(command)
-		if err != nil {
-			log.Fatal("Error parsing template:", err)
-		}
-		dirs, err := script.ListFiles(path).Basename().Slice()
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, dir := range dirs {
-			var buf bytes.Buffer
-			err = cmdTmpl.Execute(&buf, tplData{
-				Name: dir,
-				Path: path,
-			})
-			if err != nil {
-				log.Fatal(err)
-			}
-			if writeOut {
-				_, err := script.Echo(buf.String()).WriteFile(path + "/" + dir + "/" + dir + ".go")
-				if err != nil {
-					log.Fatal(err)
-				}
-			} else {
-				_, err := script.Echo("===>" + path + "/" + dir + "/" + dir + ".go<===\n" + buf.String()).Stdout()
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-		}
-
 		cmdsTmpl, err := template.New("niam").Parse(commands)
 		if err != nil {
 			log.Fatal("Error parsing template:", err)
 		}
 		// don't overwrite custom implementations
-		dirs, err = script.ListFiles(path).Basename().Reject("wasm").Slice()
+		dirs, err := script.ListFiles(path).Basename().Reject("wasm").Slice()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -103,26 +73,6 @@ var genCmd = &cobra.Command{
 		}
 	},
 }
-
-const command = `// Package main {{.Path}}/{{.Name}}/{{.Name}}.go
-//CREATED WITH GO GENERATE DO NOT EDIT!
-package main
-
-import (
-	"github.com/0magnet/audioprism-go/{{.Path}}/{{.Name}}/commands"
-	"github.com/0magnet/audioprism-go/internal/flags"
-)
-
-func init() {
-	flags.InitFlags(commands.RootCmd, true)
-}
-
-func main() {
-	if err := commands.RootCmd.Execute(); err != nil {
-		panic(err)
-	}
-}
-`
 
 const commands = `// Package commands {{.Path}}/{{.Name}}/commands/root.go
 //CREATED WITH GO GENERATE DO NOT EDIT!

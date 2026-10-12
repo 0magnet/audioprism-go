@@ -1,7 +1,10 @@
-// go run testing/txt/txt.go | aplay -f S16_LE -r 44100 -c 1
-package main
+// Package commands testing/txt/commands/root.go
+// go run . testtxt | aplay -f S16_LE -r 44100 -c 1
+package commands
 
 import (
+	"github.com/spf13/cobra"
+
 	"encoding/binary"
 	"fmt"
 	"math"
@@ -13,7 +16,7 @@ const (
 	duration   = 2
 )
 
-func main() {
+func run() {
 	ascSweep := make([]float64, sampleRate*duration)
 	descSweep := make([]float64, sampleRate*duration)
 
@@ -51,4 +54,13 @@ func main() {
 			return
 		}
 	}
+}
+
+// RootCmd is the testtxt subcommand.
+var RootCmd = &cobra.Command{
+	Use:                   "testtxt",
+	Short:                 "sweep tones as 16-bit PCM on stdout",
+	DisableFlagsInUseLine: true,
+	Args:                  cobra.NoArgs,
+	Run:                   func(_ *cobra.Command, _ []string) { run() },
 }

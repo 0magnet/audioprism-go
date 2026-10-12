@@ -1,8 +1,10 @@
-// Package main testing image encoding as frequencies
-// go run testing/img/img.go | aplay -f S16_LE -r 44100 -c 1
-package main
+// Package commands testing/img/commands/root.go: image encoding as frequencies.
+// go run . testimg | aplay -f S16_LE -r 44100 -c 1
+package commands
 
 import (
+	"github.com/spf13/cobra"
+
 	"bytes"
 	"encoding/binary"
 	"image"
@@ -20,7 +22,7 @@ const (
 	quiet      = 0
 )
 
-func main() {
+func run() {
 	imgData, err := os.ReadFile("letter.png")
 	if err != nil {
 		log.Fatal("Error reading image file:", err)
@@ -107,4 +109,13 @@ func processRow(img image.Image, row int, baseFrequency float64, segmentSampleCo
 		//			}
 		//	}
 	}
+}
+
+// RootCmd is the testimg subcommand.
+var RootCmd = &cobra.Command{
+	Use:                   "testimg",
+	Short:                 "play letter.png as frequencies (16-bit PCM on stdout)",
+	DisableFlagsInUseLine: true,
+	Args:                  cobra.NoArgs,
+	Run:                   func(_ *cobra.Command, _ []string) { run() },
 }

@@ -1,7 +1,7 @@
 name: ci
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 # What this runs is what `make check` runs locally, so a green tick here and a

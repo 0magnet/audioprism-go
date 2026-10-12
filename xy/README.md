@@ -5,18 +5,16 @@ X-Y scope visualization for stereo audio patterns using Ebiten game engine.
 ## Usage
 
 ```bash
-# Build standalone binary
-cd xy
-go build .
-./xy
+# Run from the repo root (a subcommand of the main audioprism binary)
+go run . xy-ebiten
 
 # With logging
-./xy --log audio_capture.log
+go run . xy-ebiten --log audio_capture.log
 ```
 
 ## Why Standalone?
 
-Ebiten uses GLFW, which conflicts with other GUI frameworks (Fyne, Cogentcore) in the main audioprism-go binary. This standalone version provides the best visual quality without compilation conflicts.
+Ebiten is a separate command from the Fyne scope (`xy`), with its own visual style.
 
 ## Features
 

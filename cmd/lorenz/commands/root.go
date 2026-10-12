@@ -2,16 +2,18 @@
 // stdout (48 kHz), for X-Y oscilloscope visualization — pipe it into ffmpeg.
 // test2.sh drives it; keeping the generator in Go means the repo depends only
 // on the Go toolchain.
-package main
+package commands
 
 import (
+	"github.com/spf13/cobra"
+
 	"bufio"
 	"encoding/binary"
 	"fmt"
 	"os"
 )
 
-func main() {
+func run() {
 	const (
 		sigma, rho, beta = 10.0, 28.0, 8.0 / 3.0
 		dt               = 0.0001 // integration step
@@ -62,4 +64,13 @@ func clamp(v float64) float64 {
 		return 1
 	}
 	return v
+}
+
+// RootCmd is the lorenz subcommand.
+var RootCmd = &cobra.Command{
+	Use:                   "lorenz",
+	Short:                 "stream a Lorenz attractor as float32 stereo PCM on stdout",
+	DisableFlagsInUseLine: true,
+	Args:                  cobra.NoArgs,
+	Run:                   func(_ *cobra.Command, _ []string) { run() },
 }

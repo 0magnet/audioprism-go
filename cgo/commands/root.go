@@ -1,4 +1,7 @@
-package main
+//go:build cgo
+
+// Package commands is the C spectrogram: SDL2, FFTW3 and PulseAudio via cgo.
+package commands
 
 /*
 #cgo pkg-config: sdl2 fftw3f libpulse-simple
@@ -386,43 +389,71 @@ static int run_app(config_t *cfg) {
 import "C"
 
 import (
-	"flag"
 	"os"
 	"runtime"
+
+	"github.com/spf13/cobra"
 )
 
-func main() {
+var (
+	width      int
+	height     int
+	sampleRate int
+	dftSize    int
+	overlap    float64
+	colors     string
+	window     string
+	magScale   string
+	magMin     float64
+	magMax     float64
+	fullscreen bool
+)
+
+func init() {
+	f := RootCmd.Flags()
+	f.IntVar(&width, "width", 640, "window width")
+	f.IntVar(&height, "height", 480, "window height")
+	f.IntVar(&sampleRate, "sample-rate", 24000, "audio sample rate")
+	f.IntVar(&dftSize, "dft-size", 1024, "DFT size (power of 2)")
+	f.Float64Var(&overlap, "overlap", 0.50, "overlap ratio (0.05-0.95)")
+	f.StringVar(&colors, "colors", "heat", "color scheme: heat, blue, grayscale (this build is the C one; turbo, viridis and magma are Go-side only)")
+	f.StringVar(&window, "window", "hann", "window function: hann, hamming, bartlett, rectangular")
+	f.StringVar(&magScale, "magnitude-scale", "log", "magnitude scale: log, linear")
+	f.Float64Var(&magMin, "magnitude-min", 0.0, "magnitude minimum")
+	f.Float64Var(&magMax, "magnitude-max", 45.0, "magnitude maximum")
+	f.BoolVar(&fullscreen, "fullscreen", false, "start in fullscreen")
+}
+
+// RootCmd is the C (SDL2, FFTW3, PulseAudio) spectrogram subcommand.
+var RootCmd = &cobra.Command{
+	Use:                   "c",
+	Short:                 "spectrogram implemented in C (SDL2, FFTW3, PulseAudio)",
+	DisableFlagsInUseLine: true,
+	Args:                  cobra.NoArgs,
+	Run:                   func(_ *cobra.Command, _ []string) { run() },
+}
+
+func run() {
+	// SDL wants the thread that initialized it; cobra runs this on the main
+	// goroutine, which starts on the main thread.
 	runtime.LockOSThread()
 
-	width := flag.Int("width", 640, "window width")
-	height := flag.Int("height", 480, "window height")
-	sampleRate := flag.Int("sample-rate", 24000, "audio sample rate")
-	dftSize := flag.Int("dft-size", 1024, "DFT size (power of 2)")
-	overlap := flag.Float64("overlap", 0.50, "overlap ratio (0.05-0.95)")
-	colors := flag.String("colors", "heat", "color scheme: heat, blue, grayscale (this build is the C one; turbo, viridis and magma are Go-side only)")
-	window := flag.String("window", "hann", "window function: hann, hamming, bartlett, rectangular")
-	magScale := flag.String("magnitude-scale", "log", "magnitude scale: log, linear")
-	magMin := flag.Float64("magnitude-min", 0.0, "magnitude minimum")
-	magMax := flag.Float64("magnitude-max", 45.0, "magnitude maximum")
-	fullscreen := flag.Bool("fullscreen", false, "start in fullscreen")
-	flag.Parse()
-
 	var cfg C.config_t
-	cfg.width = C.int(*width)
-	cfg.height = C.int(*height)
-	cfg.sample_rate = C.int(*sampleRate)
-	cfg.dft_size = C.int(*dftSize)
-	cfg.overlap = C.float(*overlap)
-	cfg.mag_min = C.float(*magMin)
-	cfg.mag_max = C.float(*magMax)
+	cfg.width = C.int(width)
+	cfg.height = C.int(height)
+	cfg.sample_rate = C.int(sampleRate)
+	cfg.dft_size = C.int(dftSize)
+	cfg.overlap = C.float(overlap)
+	cfg.mag_min = C.float(magMin)
+	cfg.mag_max = C.float(magMax)
 
-	switch *colors {
+	switch colors {
 	case "blue":
 		cfg.color_scheme = 1
 	case "grayscale", "gray":
 		cfg.color_scheme = 2
 	}
-	switch *window {
+	switch window {
 	case "hamming":
 		cfg.win_type = 1
 	case "bartlett":
@@ -430,10 +461,10 @@ func main() {
 	case "rectangular", "rect":
 		cfg.win_type = 3
 	}
-	if *magScale == "linear" {
+	if magScale == "linear" {
 		cfg.scale = 1
 	}
-	if *fullscreen {
+	if fullscreen {
 		cfg.fullscreen = 1
 	}
 

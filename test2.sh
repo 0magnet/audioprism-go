@@ -21,6 +21,6 @@ fi
 # Duration: 30 seconds at 48000 Hz sample rate
 echo "Generating Lorenz attractor..."
 
-(cd "$(dirname "$0")" && go run ./cmd/lorenz) | ffmpeg -f f32le -ar 48000 -ac 2 -i - $OUTPUT_ARGS
+(cd "$(dirname "$0")" && go run . lorenz) | ffmpeg -f f32le -ar 48000 -ac 2 -i - $OUTPUT_ARGS
 
 echo "Done!"

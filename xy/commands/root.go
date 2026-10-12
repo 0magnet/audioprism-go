@@ -138,7 +138,7 @@ var RootCmd = &cobra.Command{
 	DisableSuggestions:    true,
 	DisableFlagsInUseLine: true,
 	Use:                   "xy",
-	Short:                 "X-Y Audio scope",
+	Short:                 "X-Y Audio scope with Ebiten",
 	Long: `
 ─┐ ┬┬ ┬
 ┌┴┬┘└┬┘

@@ -35,6 +35,9 @@ the audio buffer and `-s/--fps` to show the rate.
 | `m` | [Go mobile](https://pkg.go.dev/golang.org/x/mobile); needs cgo, so it is absent from builds without it |
 | `p` | not live: `p <WAV in> <image out>` renders a WAV file to a PNG or JPEG |
 | `xy` | an X-Y oscilloscope for stereo audio, described in [cmd/xy/README.md](cmd/xy/README.md) |
+| `xy-ebiten` | the same scope drawn with [Ebiten](https://ebitengine.org), described in [xy/README.md](xy/README.md) |
+| `c` | the spectrogram in C (SDL2, FFTW3, PulseAudio); needs cgo and those libraries |
+| `lorenz`, `testimg`, `testtxt` | test-signal generators that write PCM to stdout (below) |
 
 `f`, `t` and `m` take `-k/--websocket` to read audio from a WebSocket URL, such
 as the one `w` serves, instead of the local sound server.
@@ -50,9 +53,9 @@ the WebTransport endpoint, and `-s/--fps` shows the frame rate in the page.
 output, and spells the magnitude scale `logarithmic` where the live frontends
 spell it `log`.
 
-`cmd/lorenz` is a signal generator rather than a frontend: it writes a Lorenz
+`lorenz` is a signal generator rather than a frontend: it writes a Lorenz
 attractor as 48 kHz 32-bit float stereo PCM to stdout, to be piped into
-ffmpeg and watched in `xy` (see `test2.sh`).
+ffmpeg and watched in `xy` (see `test2.sh`). `testimg` and `testtxt` write 16-bit mono test tones (`testimg` encodes `letter.png` as frequencies) for `aplay -f S16_LE -r 44100 -c 1`.
 
 ## Audio Source
 
@@ -135,12 +138,17 @@ Usage:
   audioprism-go
 
 Available Commands:
+  c                          spectrogram implemented in C (SDL2, FFTW3, PulseAudio)
   f                          with fyne
+  lorenz                     stream a Lorenz attractor as float32 stereo PCM on stdout
   m                          with gomobile
   p                          render a WAV file to a spectrogram image
   t                          with tcell
+  testimg                    play letter.png as frequencies (16-bit PCM on stdout)
+  testtxt                    sweep tones as 16-bit PCM on stdout
   w                          with wasm via websockets
   xy                         X-Y Audio scope
+  xy-ebiten                  X-Y Audio scope with Ebiten
 
 Flags:
   -b, --bv     print runtime/debug.BuildInfo.Main.Version

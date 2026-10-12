@@ -1,7 +1,6 @@
 //go:build cgo
 
-// Package main gomobile_cmd.go
-package main
+package commands
 
 import (
 	"github.com/0magnet/calvin"
