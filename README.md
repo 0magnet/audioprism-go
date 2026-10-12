@@ -126,20 +126,21 @@ Output of `go run . --help` and of `--help` on each subcommand:
 
 ```
 $ go run . --help
-audioprism-go
-┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐   ┌─┐┌─┐
-├─┤│ │ ││││ │├─┘├┬┘│└─┐│││───│ ┬│ │
-┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴   └─┘└─┘
+┌─┐┬ ┬┌┬┐┬┌─┐┌─┐┬─┐┬┌─┐┌┬┐
+├─┤│ │ ││││ │├─┘├┬┘│└─┐│││
+┴ ┴└─┘─┴┘┴└─┘┴  ┴└─┴└─┘┴ ┴
+built with go1.27.2-X:nodwarf5
+
 Audio Spectrogram Visualization
-(devel)
-built with go1.27.1-X:nodwarf5
 
 Usage:
-  audioprism-go
+  audioprism
+  audioprism [command]
 
 Available Commands:
   c                          spectrogram implemented in C (SDL2, FFTW3, PulseAudio)
   f                          with fyne
+  help                       Help about any command
   lorenz                     stream a Lorenz attractor as float32 stereo PCM on stdout
   m                          with gomobile
   p                          render a WAV file to a spectrogram image
@@ -151,8 +152,32 @@ Available Commands:
   xy-ebiten                  X-Y Audio scope with Ebiten
 
 Flags:
-  -b, --bv     print runtime/debug.BuildInfo.Main.Version
+  -b, --bv     print the main module's version
   -d, --info   print runtime/debug.BuildInfo
+
+Use "audioprism [command] --help" for more information about a command.
+
+$ go run . c --help
+┌─┐
+│  
+└─┘
+Audio Spectrogram Visualization in C with SDL2, FFTW3 and PulseAudio
+
+Usage:
+  audioprism c
+
+Flags:
+      --colors string            color scheme: heat, blue, grayscale (this build is the C one; turbo, viridis and magma are Go-side only) (default "heat")
+      --dft-size int             DFT size (power of 2) (default 1024)
+      --fullscreen               start in fullscreen
+      --height int               window height (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: log, linear (default "log")
+      --overlap float            overlap ratio (0.05-0.95) (default 0.5)
+      --sample-rate int          audio sample rate (default 24000)
+      --width int                window width (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
 
 $ go run . f --help
 ┌─┐┬ ┬┌┐┌┌─┐
@@ -161,9 +186,7 @@ $ go run . f --help
 Audio Spectrogram Visualization with Fyne GUI
 
 Usage:
-  audioprism-go f
-
-
+  audioprism f
 
 Flags:
   -b, --buf int                  size of audio buffer (default 32768)
@@ -180,6 +203,12 @@ Flags:
   -x, --width int                initial window width (default 640)
       --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
 
+$ go run . lorenz --help
+stream a Lorenz attractor as float32 stereo PCM on stdout
+
+Usage:
+  audioprism lorenz
+
 $ go run . m --help
 ┌─┐┌─┐┌┬┐┌─┐┌┐ ┬┬  ┌─┐
 │ ┬│ │││││ │├┴┐││  ├┤ 
@@ -187,9 +216,7 @@ $ go run . m --help
 Audio Spectrogram Visualization with golang.org/x/mobile GUI
 
 Usage:
-  audioprism-go m
-
-
+  audioprism m
 
 Flags:
   -b, --buf int                  size of audio buffer (default 32768)
@@ -204,6 +231,28 @@ Flags:
   -u, --up int                   fps rate - 0 unlimits (default 60)
   -k, --websocket string         websocket url (i.e. 'ws://127.0.0.1:8080/ws')
   -x, --width int                initial window width (default 640)
+      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
+
+$ go run . p --help
+┌─┐┌┐┌┌─┐
+├─┘││││ ┬
+┴  ┘└┘└─┘
+Audio Spectrogram Visualization from a WAV file to an image file
+
+Usage:
+  audioprism p
+
+Flags:
+      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
+      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
+  -y, --height int               height of spectrogram (default 480)
+      --magnitude-max float      magnitude maximum (default 45)
+      --magnitude-min float      magnitude minimum
+      --magnitude-scale string   magnitude scale: logarithmic, linear (default "logarithmic")
+      --orientation string       orientation: horizontal, vertical (default "vertical")
+      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
+      --quality int              JPEG quality, when the output is a .jpg (default 95)
+  -x, --width int                width of spectrogram (default 640)
       --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
 
 $ go run . t --help
@@ -213,9 +262,7 @@ $ go run . t --help
 Audio Spectrogram Visualization with Tcell TUI
 
 Usage:
-  audioprism-go t
-
-
+  audioprism t
 
 Flags:
   -b, --buf int                  size of audio buffer (default 32768)
@@ -232,6 +279,18 @@ Flags:
   -x, --width int                initial window width (default 640)
       --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
 
+$ go run . testimg --help
+play letter.png as frequencies (16-bit PCM on stdout)
+
+Usage:
+  audioprism testimg
+
+$ go run . testtxt --help
+sweep tones as 16-bit PCM on stdout
+
+Usage:
+  audioprism testtxt
+
 $ go run . w --help
 ┬ ┬┌─┐┌─┐┌┬┐
 │││├─┤└─┐│││
@@ -239,9 +298,7 @@ $ go run . w --help
 Audio Spectrogram Visualization in Webassembly
 
 Usage:
-  audioprism-go w
-
-
+  audioprism w
 
 Flags:
       --bind string      address to bind to; empty means every interface (e.g. 127.0.0.1 to serve only locally)
@@ -258,30 +315,6 @@ Flags:
       --wt-path string   WebTransport endpoint path (default "/wt")
       --wt-port int      UDP port for WebTransport (0 = the same number as --port; QUIC is UDP so the numbers can be shared, and sharing them keeps the browser's origin check happy)
 
-$ go run . p --help
-┌─┐┌┐┌┌─┐
-├─┘││││ ┬
-┴  ┘└┘└─┘
-Audio Spectrogram Visualization from a WAV file to an image file
-
-Usage:
-  audioprism-go p
-
-
-
-Flags:
-      --colors string            color scheme: heat, blue, grayscale, turbo, viridis, magma (default "heat")
-      --dft-size int             DFT size (power of 2, 64-8192) (default 1024)
-  -y, --height int               height of spectrogram (default 480)
-      --magnitude-max float      magnitude maximum (default 45)
-      --magnitude-min float      magnitude minimum
-      --magnitude-scale string   magnitude scale: logarithmic, linear (default "logarithmic")
-      --orientation string       orientation: horizontal, vertical (default "vertical")
-      --overlap float            samples overlap percentage (5-95), or a ratio (0.05-0.95) (default 0.5)
-      --quality int              JPEG quality, when the output is a .jpg (default 95)
-  -x, --width int                width of spectrogram (default 640)
-      --window string            window function: hann, hamming, bartlett, rectangular (default "hann")
-
 $ go run . xy --help
 ─┐ ┬┬ ┬
 ┌┴┬┘└┬┘
@@ -289,9 +322,20 @@ $ go run . xy --help
 X-Y Audio Oscilloscope
 
 Usage:
-  audioprism-go xy
+  audioprism xy
 
+$ go run . xy-ebiten --help
+─┐ ┬┬ ┬   ┌─┐┌┐ ┬┌┬┐┌─┐┌┐┌
+┌┴┬┘└┬┘───├┤ ├┴┐│ │ ├┤ │││
+┴ └─ ┴    └─┘└─┘┴ ┴ └─┘┘└┘
+X-Y Audio Oscilloscope with Ebiten
 
+Usage:
+  audioprism xy-ebiten
+
+Flags:
+  -f, --file string   log to file if specified
+  -l, --log           enable print plot point logging
 ```
 
 ## Dependency Graph
@@ -318,15 +362,15 @@ gocloc --not-match-d='(vendor|node_modules|\.git)' .
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Go                              56            895           1784           7265
+Go                              47            817           1658           6735
 JavaScript                       1             61             36            478
-Markdown                         3            118              0            362
+Markdown                         3            118              0            367
 Makefile                         1             21             52            111
 YAML                             1              0              7             98
 BASH                             4             22             38             83
 Bourne Shell                     1              8             16             30
 JSON                             2              0              0             21
 -------------------------------------------------------------------------------
-TOTAL                           69           1125           1933           8448
+TOTAL                           60           1047           1807           7923
 -------------------------------------------------------------------------------
 ```
