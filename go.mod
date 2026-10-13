@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.8.2
-	github.com/0magnet/calvin v0.0.1-0.20261012011430-3b61384c1b9e
+	github.com/0magnet/calvin v0.0.1-0.20261013200157-9f68c20a964b
 	github.com/0magnet/go-dsp v0.0.1-0.20261004205004-01fc64b17317
 	github.com/bitfield/script v0.25.2
 	github.com/gin-gonic/gin v1.12.0
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	github.com/0magnet/coloredcobra v1.0.4-0.20261011230509-d5385cf44398 // indirect
+	github.com/0magnet/coloredcobra v1.0.4-0.20261012213101-faa6bd8f94c5 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 )
 
@@ -55,7 +55,7 @@ require (
 	github.com/go-text/typesetting v0.3.5 // indirect
 	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/godbus/dbus/v5 v5.2.3 // indirect
+	github.com/godbus/dbus/v5 v5.2.4 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
