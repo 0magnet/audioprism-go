@@ -3,7 +3,7 @@ module github.com/0magnet/audioprism-go
 go 1.26.2
 
 require (
-	fyne.io/fyne/v2 v2.8.1
+	fyne.io/fyne/v2 v2.8.2
 	github.com/0magnet/calvin v0.0.1-0.20261012011430-3b61384c1b9e
 	github.com/0magnet/go-dsp v0.0.1-0.20261004205004-01fc64b17317
 	github.com/bitfield/script v0.25.2
@@ -42,7 +42,7 @@ require (
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect
 	github.com/fyne-io/glfw-js v0.4.0 // indirect
 	github.com/fyne-io/image v0.1.1 // indirect
-	github.com/fyne-io/oksvg v0.2.0 // indirect
+	github.com/fyne-io/oksvg v0.2.1-0.20260918172519-a9af55fa95d9 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
 	github.com/gdamore/tcell/v3 v3.6.0

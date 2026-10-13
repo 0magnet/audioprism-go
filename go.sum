@@ -1,5 +1,5 @@
-fyne.io/fyne/v2 v2.8.1 h1:EztGuE2W3Qhd0cWVmU+h5rkzNezUD1To6UqsoLQYUIM=
-fyne.io/fyne/v2 v2.8.1/go.mod h1:kpeuFrClm0fiAgJYr2soTfwKMT5rzNcSKzmgGjxvHOY=
+fyne.io/fyne/v2 v2.8.2 h1:gYNJj+ZEPd2wF3M8SlF5iL6febpZkZ1csheRFkuEfHU=
+fyne.io/fyne/v2 v2.8.2/go.mod h1:eXHJ/D9Y58UcDw7SkguadCRI64M4flXyjoMn827Q5SI=
 fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 h1:149/+Wa5EsLLXfyj2pdTmvnQf2VIlgCIwSjcCTHYhIo=
 fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4/go.mod h1:RVwqP9nYMo7h5zViCBHri2FgjXF7H2cub7MAq4NSoLs=
 github.com/0magnet/calvin v0.0.1-0.20261012011430-3b61384c1b9e h1:ovvGqBWD3RC+a/7zrIU5NfXjyB9g88aC9wMdtWiwUqM=
@@ -49,8 +49,8 @@ github.com/fyne-io/glfw-js v0.4.0 h1:I9hREBeFyI10cNIqbMKYb1PRidyPDgwob8o2la9SfQo
 github.com/fyne-io/glfw-js v0.4.0/go.mod h1:SDchsFZh4n7nVuBoiowOhOgIBdz+qUQVeC1w9fe2yVU=
 github.com/fyne-io/image v0.1.1 h1:WH0z4H7qfvNUw5l4p3bC1q70sa5+YWVt6HCj7y4VNyA=
 github.com/fyne-io/image v0.1.1/go.mod h1:xrfYBh6yspc+KjkgdZU/ifUC9sPA5Iv7WYUBzQKK7JM=
-github.com/fyne-io/oksvg v0.2.0 h1:mxcGU2dx6nwjJsSA9PCYZDuoAcsZ/OuJlvg/Q9Njfo8=
-github.com/fyne-io/oksvg v0.2.0/go.mod h1:dJ9oEkPiWhnTFNCmRgEze+YNprJF7YRbpjgpWS4kzoI=
+github.com/fyne-io/oksvg v0.2.1-0.20260918172519-a9af55fa95d9 h1:owsdpq6a2KhaAA/hoHGQmFM7kOgKo3srXZVGnbEUzr0=
+github.com/fyne-io/oksvg v0.2.1-0.20260918172519-a9af55fa95d9/go.mod h1:dJ9oEkPiWhnTFNCmRgEze+YNprJF7YRbpjgpWS4kzoI=
 github.com/gabriel-vasile/mimetype v1.4.15 h1:05iP/CYtZ/w455R/KZM6rZ5ieAdh99UPtd+d3YzLmaI=
 github.com/gabriel-vasile/mimetype v1.4.15/go.mod h1:azpTcoLcDZRNgFou5j+APrqQx9HqVPWa6ijYQIIVswQ=
 github.com/gdamore/encoding v1.0.1 h1:YzKZckdBL6jVt2Gc+5p82qhrGiqMdG/eNs6Wy0u3Uhw=

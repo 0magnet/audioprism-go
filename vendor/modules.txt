@@ -1,4 +1,4 @@
-# fyne.io/fyne/v2 v2.8.1
+# fyne.io/fyne/v2 v2.8.2
 ## explicit; go 1.22.0
 fyne.io/fyne/v2
 fyne.io/fyne/v2/app
@@ -182,7 +182,7 @@ github.com/fyne-io/glfw-js
 # github.com/fyne-io/image v0.1.1
 ## explicit; go 1.19
 github.com/fyne-io/image/ico
-# github.com/fyne-io/oksvg v0.2.0
+# github.com/fyne-io/oksvg v0.2.1-0.20260918172519-a9af55fa95d9
 ## explicit; go 1.19
 github.com/fyne-io/oksvg
 # github.com/gabriel-vasile/mimetype v1.4.15
