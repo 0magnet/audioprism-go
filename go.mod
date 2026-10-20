@@ -11,7 +11,7 @@ require (
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
 	github.com/hajimehoshi/ebiten/v2 v2.10.5
 	github.com/jfreymuth/pulse v0.1.3
-	github.com/quic-go/quic-go v0.64.0
+	github.com/quic-go/quic-go v0.64.1
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/mobile v0.0.0-20261011034528-197770444867
