@@ -83,7 +83,7 @@ github.com/bitfield/script
 # github.com/bytedance/gopkg v0.1.4
 ## explicit; go 1.18
 github.com/bytedance/gopkg/lang/dirtmake
-# github.com/bytedance/sonic v1.15.4
+# github.com/bytedance/sonic v1.15.5
 ## explicit; go 1.18
 github.com/bytedance/sonic
 github.com/bytedance/sonic/ast
