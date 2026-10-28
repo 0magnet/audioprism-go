@@ -222,7 +222,7 @@ func wtConsume(val js.Value) {
 	}
 	b := wtBuf[:n]
 	js.CopyBytesToGo(b, val)
-	payload := wtRA.Push(b)
+	payload := wtRA.Next(b) // decoded below before the next datagram
 	if payload == nil {
 		return
 	}

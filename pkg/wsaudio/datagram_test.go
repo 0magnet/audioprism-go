@@ -2,6 +2,7 @@ package wsaudio
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"math"
 	"math/rand"
@@ -399,4 +400,65 @@ func TestLossyLinkNeverCorrupts(t *testing.T) {
 		t.Errorf("%d delivered + %d dropped != %d sent", delivered, r.Dropped, sent)
 	}
 	t.Logf("5%% datagram loss over %d chunks: %d delivered, %d dropped", sent, delivered, r.Dropped)
+}
+
+// Next gives back what Push does, and once it has seen a message the size
+// of the next it allocates nothing: a page reassembles a message every few
+// tens of milliseconds for as long as it is open.
+func TestNextReusesItsBuffers(t *testing.T) {
+	const maxSize = 1200
+	payload := make([]byte, 3*DatagramPayloadSize(maxSize)+100)
+	for i := range payload {
+		payload[i] = byte(i * 7)
+	}
+	var push, next Reassembler
+	id := uint16(0)
+	feed := func() (got, want []byte) {
+		id++
+		for _, dg := range SplitDatagrams(id, payload, maxSize) {
+			if p := push.Push(dg); p != nil {
+				want = p
+			}
+			if p := next.Next(dg); p != nil {
+				got = p
+			}
+		}
+		return got, want
+	}
+	got, want := feed()
+	if !bytes.Equal(got, payload) || !bytes.Equal(want, payload) {
+		t.Fatalf("Next %d bytes, Push %d bytes, sent %d", len(got), len(want), len(payload))
+	}
+	dgs := SplitDatagrams(1000, payload, maxSize)
+	id = 1000
+	allocs := testing.AllocsPerRun(50, func() {
+		id++
+		for i := range dgs {
+			binary.LittleEndian.PutUint16(dgs[i][0:2], id)
+			next.Next(dgs[i])
+		}
+	})
+	if allocs != 0 {
+		t.Errorf("Next allocated %.1f times a message", allocs)
+	}
+}
+
+// BytesToFloat32Into decodes as BytesToFloat32 does, into the buffer it is
+// given when that is large enough.
+func TestBytesToFloat32IntoReuses(t *testing.T) {
+	in := []float32{1, -0.5, 0.25, 3}
+	b := Float32ToBytes(in)
+	buf := make([]float32, 0, 8)
+	out := BytesToFloat32Into(buf, b)
+	if len(out) != len(in) || &out[0] != &buf[:1][0] {
+		t.Fatalf("decoded %v, not into the buffer given", out)
+	}
+	for i := range in {
+		if out[i] != in[i] {
+			t.Fatalf("sample %d: %v, want %v", i, out[i], in[i])
+		}
+	}
+	if got := BytesToFloat32Into(nil, b[:3]); len(got) != 0 {
+		t.Errorf("a partial sample decoded to %v", got)
+	}
 }
