@@ -11,7 +11,7 @@ require (
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
 	github.com/hajimehoshi/ebiten/v2 v2.10.5
 	github.com/jfreymuth/pulse v0.1.3
-	github.com/quic-go/quic-go v0.65.0
+	github.com/quic-go/quic-go v0.64.1
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/mobile v0.0.0-20261011034528-197770444867
@@ -99,3 +99,9 @@ require (
 )
 
 exclude github.com/mjibson/go-dsp v1.0.0
+
+// webtransport-go v0.13.0 does not build against quic-go v0.65.0 (http3's
+// HTTPStream returns an error now); quic-go/webtransport-go#377 fixes it.
+// Excluded rather than pinned so a go get -u leaves it alone. Remove this once
+// a webtransport-go release requires quic-go v0.65 or newer.
+exclude github.com/quic-go/quic-go v0.65.0
