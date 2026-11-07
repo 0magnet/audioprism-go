@@ -307,7 +307,7 @@ github.com/hack-pad/go-indexeddb/idb/internal/jscache
 github.com/hack-pad/safejs
 github.com/hack-pad/safejs/internal/catch
 github.com/hack-pad/safejs/internal/stackerr
-# github.com/hajimehoshi/ebiten/v2 v2.10.5
+# github.com/hajimehoshi/ebiten/v2 v2.10.6
 ## explicit; go 1.25.0
 github.com/hajimehoshi/ebiten/v2
 github.com/hajimehoshi/ebiten/v2/ebitenutil
@@ -510,7 +510,7 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# go.mongodb.org/mongo-driver/v2 v2.9.3
+# go.mongodb.org/mongo-driver/v2 v2.10.0
 ## explicit; go 1.25.0
 go.mongodb.org/mongo-driver/v2/bson
 go.mongodb.org/mongo-driver/v2/internal/binaryutil
@@ -530,7 +530,7 @@ golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
-# golang.org/x/exp/shiny v0.0.0-20261106112924-d498a4c2cc9a
+# golang.org/x/exp/shiny v0.0.0-20261106192419-47ce03d25ef0
 ## explicit; go 1.26.0
 golang.org/x/exp/shiny/driver/gldriver
 golang.org/x/exp/shiny/driver/internal/drawer
