@@ -530,7 +530,7 @@ golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
-# golang.org/x/exp/shiny v0.0.0-20261109185158-a52e3aef5920
+# golang.org/x/exp/shiny v0.0.0-20261113113407-e3970619a1a4
 ## explicit; go 1.26.0
 golang.org/x/exp/shiny/driver/gldriver
 golang.org/x/exp/shiny/driver/internal/drawer
