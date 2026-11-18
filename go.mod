@@ -14,8 +14,8 @@ require (
 	github.com/quic-go/quic-go v0.64.1
 	github.com/quic-go/webtransport-go v0.13.0
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/mobile v0.0.0-20261011034528-197770444867
-	golang.org/x/net v0.62.0
+	golang.org/x/mobile v0.0.0-20261117202452-47699113848a
+	golang.org/x/net v0.63.0
 )
 
 require (
@@ -88,7 +88,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/arch v0.33.0 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp/shiny v0.0.0-20261113113407-e3970619a1a4 // indirect
+	golang.org/x/exp/shiny v0.0.0-20261117202309-7a49493bfd90 // indirect
 	golang.org/x/image v0.48.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
