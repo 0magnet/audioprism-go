@@ -510,7 +510,7 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# go.mongodb.org/mongo-driver/v2 v2.10.0
+# go.mongodb.org/mongo-driver/v2 v2.10.1
 ## explicit; go 1.25.0
 go.mongodb.org/mongo-driver/v2/bson
 go.mongodb.org/mongo-driver/v2/internal/binaryutil
@@ -530,7 +530,7 @@ golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
-# golang.org/x/exp/shiny v0.0.0-20261118215729-2791e4028fd4
+# golang.org/x/exp/shiny v0.0.0-20261120130654-b6de8d37927a
 ## explicit; go 1.26.0
 golang.org/x/exp/shiny/driver/gldriver
 golang.org/x/exp/shiny/driver/internal/drawer

@@ -178,8 +178,8 @@ github.com/ugorji/go/codec v1.3.2/go.mod h1:pRBVtBSKl77K30Bv8R2P+cLSGaTtex6fsA2W
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yuin/goldmark v1.8.7 h1:XT/tNqCIbabh0ln675w4x3dv04kQBKi8NwYqi9IJaxI=
 github.com/yuin/goldmark v1.8.7/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
-go.mongodb.org/mongo-driver/v2 v2.10.0 h1:BYJLuVSu3/xDvToG+VQyoTPS+jxq9tuQDf+1nAlFKSE=
-go.mongodb.org/mongo-driver/v2 v2.10.0/go.mod h1:PxPyIAlsI1jkYZvUNfTr++ggyBP+RSaxHYctt6TcZc4=
+go.mongodb.org/mongo-driver/v2 v2.10.1 h1:FScYVU+0h/zERnvYemJix3ZDgeU2QGmC8EuXLSWLdf8=
+go.mongodb.org/mongo-driver/v2 v2.10.1/go.mod h1:PxPyIAlsI1jkYZvUNfTr++ggyBP+RSaxHYctt6TcZc4=
 go.uber.org/mock v0.6.0 h1:hyF9dfmbgIX5EfOdasqLsWD6xqpNZlXblLB/Dbnwv3Y=
 go.uber.org/mock v0.6.0/go.mod h1:KiVJ4BqZJaMj4svdfmHM0AUx4NJYO8ZNpPnZn1Z+BBU=
 go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
@@ -191,8 +191,8 @@ golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACk
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.59.0 h1:xS2jhqYbzNrpvkWP2YTDf4TJwBy3ykR03i8vFDxEc7c=
 golang.org/x/crypto v0.59.0/go.mod h1:veDyUwATGs3c+vN3VfTbzViMGXeTBk3WyhBOkn+F/4U=
-golang.org/x/exp/shiny v0.0.0-20261118215729-2791e4028fd4 h1:o7lqUO+yNUP6oSNWeyHUWfKAgwsaajLP/njtSoQEi9w=
-golang.org/x/exp/shiny v0.0.0-20261118215729-2791e4028fd4/go.mod h1:PlFR9StaEp5crRgynMOICwNY6fDmY2YauAW8l0SqiTY=
+golang.org/x/exp/shiny v0.0.0-20261120130654-b6de8d37927a h1:9A9FUqvD0dfxrxOa3Bkufz6jJXzqBvcWt7iDltAC9Fc=
+golang.org/x/exp/shiny v0.0.0-20261120130654-b6de8d37927a/go.mod h1:PlFR9StaEp5crRgynMOICwNY6fDmY2YauAW8l0SqiTY=
 golang.org/x/image v0.48.0 h1:1AvuPcuoOTJpA7s4VZ5umrb90T3So0rkB/bSGmxkxik=
 golang.org/x/image v0.48.0/go.mod h1:mmtg64iqJKGqEgy+r13dfybl85tmxUd2lMnmaiSdWYY=
 golang.org/x/mobile v0.0.0-20261117202452-47699113848a h1:jYIfLfiCY1/N6kWqBdUak4c1kMN0vKnoQypLZqbGqv4=
