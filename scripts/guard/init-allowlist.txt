@@ -1,0 +1,12 @@
+cgo/commands/root.go
+cmd/a/fyne/commands/root.go
+cmd/a/gomobile/commands/root.go
+cmd/a/tcell/commands/root.go
+cmd/a/wasm/commands/root.go
+cmd/png/commands/root.go
+commands/ebiten.go
+commands/gen.go
+commands/gomobile.go
+commands/root.go
+commands/sdl.go
+xy/commands/root.go
