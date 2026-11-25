@@ -97,6 +97,11 @@ type Entry struct {
 
 	// selectKeyDown indicates whether left shift or right shift is currently held down
 	selectKeyDown bool
+	// tripleTapped records that the current touch selected a row, so the touch up must not move the cursor
+	tripleTapped bool
+
+	// keepScrollOffset stops a refresh caused by a focus change from scrolling to the cursor
+	keepScrollOffset bool
 
 	sel   *selectable
 	popUp *PopUpMenu
@@ -289,9 +294,14 @@ func (e *Entry) DragEnd() {
 
 // Dragged is called when the pointer moves while a button is held down.
 // It updates the selection accordingly.
+// On mobile a drag is reserved for scrolling, so it never changes the selection.
 func (e *Entry) Dragged(d *fyne.DragEvent) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.dragged(d)
+	e.sel.dragSelect(d)
 	e.updateMousePointer(d.Position, false)
 }
 
@@ -303,6 +313,8 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.hasFocused = true
 		e.dirty = true
@@ -315,6 +327,8 @@ func (e *Entry) FocusGained() {
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
@@ -601,30 +615,48 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // TouchDown is called when this entry gets a touch down event on mobile device, we ensure we have focus.
 //
 // Since: 2.1
-func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
-	now := time.Now().UnixMilli()
+func (e *Entry) TouchDown(*mobile.TouchEvent) {
 	e.syncSegments()
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-	if isTripleTap(e.sel.doubleTappedAtUnixMillis, now) {
+	// a triple tap is timed from the touch down, so it must be detected here rather than on touch up
+	e.tripleTapped = isTripleTap(e.sel.doubleTappedAtUnixMillis, time.Now().UnixMilli())
+	if e.tripleTapped {
 		e.sel.selectCurrentRow(false)
 		e.CursorColumn = e.sel.cursorColumn
 		e.Refresh()
+	}
+}
+
+// TouchUp is called when this entry gets a touch up event on mobile device.
+// This is where a tap places the cursor, as the driver only sends it for a touch that did not scroll.
+//
+// Since: 2.1
+func (e *Entry) TouchUp(ev *mobile.TouchEvent) {
+	if e.tripleTapped {
+		e.tripleTapped = false
 		return
+	}
+
+	pos := ev.Position.Add(e.scroll.Offset)
+	start, end := e.sel.selection()
+	if e.sel.selecting && start != -1 && end != -1 && start != end {
+		row, col := e.sel.getRowCol(pos)
+		textPos := textPosFromRowCol(row, col, e.textProvider())
+		if textPos >= start && textPos < end {
+			e.CursorRow = row
+			e.CursorColumn = col
+			e.syncSelectable()
+			return
+		}
 	}
 
 	if e.sel.selecting {
 		e.sel.selecting = false
 	}
 
-	e.updateMousePointer(ev.Position.Add(e.scroll.Offset), false)
-}
-
-// TouchUp is called when this entry gets a touch up event on mobile device.
-//
-// Since: 2.1
-func (e *Entry) TouchUp(*mobile.TouchEvent) {
+	e.updateMousePointer(pos, false)
 }
 
 // TouchCancel is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
@@ -1591,6 +1623,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	prov := r.entry.textProvider()
 	textPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
 	selectPos := textPosFromRowCol(r.entry.sel.selectRow, r.entry.sel.selectColumn, prov)
+	// Wrapping may have changed since SetText created the providers.
+	wrap := r.entry.textWrap()
+	for _, provider := range []*RichText{prov, r.entry.placeholderProvider()} {
+		if provider.Wrapping != wrap {
+			provider.Wrapping = wrap
+			provider.Refresh()
+		}
+	}
+	if rend := cache.Renderer(r.entry.content); rend != nil {
+		rend.(*entryContentRenderer).updateScrollDirections()
+	}
+
 	if r.entry.Wrapping == fyne.TextWrapOff && r.entry.Scroll == widget.ScrollNone {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
@@ -1599,11 +1643,14 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.scroll.Move(entryPos)
 	}
 
+	// a cursor on the first row keeps its text position whatever the wrapping does,
+	// because that position is just the column, so look for a column that the new
+	// rows have left past the end of its own row as well.
 	resizedTextPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
-	if textPos != resizedTextPos {
+	if textPos != resizedTextPos || r.entry.CursorColumn > prov.rowLength(r.entry.CursorRow) {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
-			r.entry.sel.cursorRow, r.entry.sel.cursorRow = r.entry.CursorRow, r.entry.CursorColumn
+			r.entry.sel.cursorRow, r.entry.sel.cursorColumn = r.entry.CursorRow, r.entry.CursorColumn
 
 			if r.entry.sel.selecting {
 				r.entry.sel.selectRow, r.entry.sel.selectColumn = r.entry.rowColFromTextPos(selectPos)
@@ -1681,6 +1728,8 @@ func (r *entryRenderer) Refresh() {
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
+		// The content is moved back to the top, so a stale offset would map later taps onto the wrong line.
+		r.scroll.Offset = fyne.NewPos(0, 0)
 		content.Move(fyne.NewPos(0, inputBorder))
 		content.Resize(entrySize)
 
@@ -1784,20 +1833,6 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	r.updateScrollDirections()
 	r.Layout(e.Size())
 	return r
-}
-
-// DragEnd is called at end of a drag event.
-func (e *entryContent) DragEnd() {
-	// we need to propagate the focus, top level widget handles focus APIs
-	e.entry.requestFocus()
-
-	e.entry.DragEnd()
-}
-
-// Dragged is called when the pointer moves while a button is held down.
-// It updates the selection accordingly.
-func (e *entryContent) Dragged(d *fyne.DragEvent) {
-	e.entry.Dragged(d)
 }
 
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
@@ -1919,7 +1954,9 @@ func (r *entryContentRenderer) moveCursor() {
 	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
-	r.ensureCursorVisible()
+	if !r.content.entry.keepScrollOffset {
+		r.ensureCursorVisible()
+	}
 
 	if callback != nil {
 		callback()

@@ -20,6 +20,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -265,6 +266,8 @@ func (d *driver) Run() {
 					case touch.TypeEnd:
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
+				case mouse.ScrollEvent:
+					d.scrollCanvas(current, e)
 				case key.Event:
 					if runtime.GOOS == "android" && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
 						break // we are getting release/press on backspace during soft backspace
@@ -513,6 +516,32 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	})
 }
 
+// scrollCanvas sends a vertical mouse wheel scroll from the simulator to the
+// scrollable object under the mouse, if there is one at that position. It
+// uses the shared scroll speed, without the desktop driver's acceleration.
+func (*driver) scrollCanvas(w *window, e mouse.ScrollEvent) {
+	pos := fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(e.X)),
+		scale.ToFyneCoordinate(w.canvas, int(e.Y))+tapYOffset)
+
+	co, objPos, _ := w.canvas.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		_, ok := object.(fyne.Scrollable)
+		return ok
+	})
+
+	wid, ok := co.(fyne.Scrollable)
+	if !ok {
+		return
+	}
+
+	wid.Scrolled(&fyne.ScrollEvent{
+		PointEvent: fyne.PointEvent{
+			Position:         objPos,
+			AbsolutePosition: pos,
+		},
+		Scrolled: fyne.NewDelta(0, e.ScrollY*common.ScrollSpeed),
+	})
+}
+
 var keyCodeMap = map[key.Code]fyne.KeyName{
 	// non-printable
 	key.CodeEscape:          fyne.KeyEscape,
@@ -698,4 +727,9 @@ func NewGoMobileDriver() fyne.Driver {
 
 	registerRepository(d)
 	return d
+}
+
+// RenderedTextSizeFor measures text in the fonts of the theme scope o is in.
+func (*driver) RenderedTextSizeFor(o fyne.CanvasObject, text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	return painter.RenderedTextSizeFor(o, text, textSize, style, source)
 }

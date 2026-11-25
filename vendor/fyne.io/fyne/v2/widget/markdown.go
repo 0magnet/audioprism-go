@@ -84,12 +84,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return result, err
 	case *ast.TextBlock:
 		if c, ok := t.FirstChild().(*ast2.TaskCheckBox); ok {
-			child := c.NextSibling()
-			text := ""
-			if child != nil {
-				text = string(child.(*ast.Text).Value(source))
-			}
-			return []RichTextSegment{&CheckBoxSegment{Text: decodeText(text), Checked: c.IsChecked}}, nil
+			return renderTaskList(source, c, quotingDepth, listDepth)
 		}
 		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Heading:
@@ -115,12 +110,13 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return renderEmphasis(source, n, quotingDepth, 3, listDepth)
 	case *ast.Text:
 		text := string(t.Value(source))
-		if text == "" {
+		if t.HardLineBreak() {
+			text += "\n"
+		} else if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
-		}
-		if n.(*ast.Text).SoftLineBreak() {
-			text = text + " "
+		} else if t.SoftLineBreak() {
+			text += " "
 		}
 		if quotingDepth > 0 {
 			style := RichTextStyleBlockquote
@@ -199,6 +195,26 @@ func renderChildren(source []byte, n ast.Node, quotingDepth int, listDepth int) 
 		child = child.NextSibling()
 	}
 	return children, nil
+}
+
+func renderTaskList(source []byte, c *ast2.TaskCheckBox, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
+	if text, ok := c.NextSibling().(*ast.Text); ok && text.NextSibling() == nil &&
+		!text.SoftLineBreak() && !text.HardLineBreak() {
+		return []RichTextSegment{&CheckBoxSegment{
+			Checked: c.IsChecked,
+			Text:    decodeText(string(text.Value(source))),
+		}}, nil
+	}
+
+	segments := []RichTextSegment{&CheckBoxSegment{Checked: c.IsChecked}}
+	for child := c.NextSibling(); child != nil; child = child.NextSibling() {
+		segs, err := renderNode(source, child, quotingDepth, listDepth)
+		if err != nil {
+			return segments, err
+		}
+		segments = append(segments, segs...)
+	}
+	return segments, nil
 }
 
 func renderEmphasis(source []byte, n ast.Node, quotingDepth int, strength, listDepth int) ([]RichTextSegment, error) {
@@ -297,18 +313,21 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 
 func forceIntoText(source []byte, n ast.Node) string {
 	text := strings.Builder{}
+	lineBreak := false
 	// ast.Walk() only ever returns an error if the walker does and our walker does not.
 	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
-			switch t := n2.(type) {
-			case *ast.Text:
+			if t, ok := n2.(*ast.Text); ok {
+				if lineBreak {
+					text.WriteByte(' ')
+				}
 				text.Write(t.Value(source))
-				text.WriteByte(' ')
+				lineBreak = t.SoftLineBreak() || t.HardLineBreak()
 			}
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), " ")
+	return text.String()
 }
 
 func parseMarkdown(content string) []RichTextSegment {
