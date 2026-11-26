@@ -56,7 +56,7 @@ fyne.io/fyne/v2/widget
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/0magnet/calvin v0.0.1-0.20261123113739-17ec6c31723c
+# github.com/0magnet/calvin v0.0.1-0.20261125222219-4228c77b6748
 ## explicit; go 1.26.0
 github.com/0magnet/calvin
 github.com/0magnet/calvin/clihelp
@@ -466,7 +466,7 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.1.0
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
+# github.com/srwiley/oksvg v0.0.0-20261126071609-7c888656762b
 ## explicit; go 1.17
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef

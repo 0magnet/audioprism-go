@@ -4,7 +4,7 @@ go 1.26.10
 
 require (
 	fyne.io/fyne/v2 v2.8.3
-	github.com/0magnet/calvin v0.0.1-0.20261123113739-17ec6c31723c
+	github.com/0magnet/calvin v0.0.1-0.20261125222219-4228c77b6748
 	github.com/0magnet/go-dsp v0.0.1-0.20261013221717-1ec76fa9affb
 	github.com/bitfield/script v0.25.2
 	github.com/gin-gonic/gin v1.12.0
@@ -78,7 +78,7 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/spf13/pflag v1.1.0 // indirect
-	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
+	github.com/srwiley/oksvg v0.0.0-20261126071609-7c888656762b // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
