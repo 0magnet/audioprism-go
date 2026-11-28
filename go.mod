@@ -78,8 +78,8 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/spf13/pflag v1.1.0 // indirect
-	github.com/srwiley/oksvg v0.0.0-20261126071609-7c888656762b // indirect
-	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
+	github.com/srwiley/oksvg v0.0.0-20261128051108-63f39d1445ed // indirect
+	github.com/srwiley/rasterx v0.0.0-20261128054241-78f2104be592 // indirect
 	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.2 // indirect
@@ -88,7 +88,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/arch v0.33.0 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp/shiny v0.0.0-20261124000051-d6646c509b6d // indirect
+	golang.org/x/exp/shiny v0.0.0-20261128033645-f63ec7c7eed0 // indirect
 	golang.org/x/image v0.48.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
